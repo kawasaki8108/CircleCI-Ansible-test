@@ -15,7 +15,7 @@ jobs:
     - attach_workspace:
         at: .
     - run: |
-          cat bash.env >> $BASH_ENV    
+          cat bash.env >> $BASH_ENV
     - add_ssh_keys:
         fingerprints:
           - "${KEY_FINGERPRINT}"
