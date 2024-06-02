@@ -1,43 +1,59 @@
-# Couldn't automatically generate a config from your source code.
-# This is a generic template to serve as a base for your custom config
-# See: https://circleci.com/docs/configuration-reference
 version: 2.1
+orbs:
+  python: circleci/python@2.0.3
+  aws-cli: circleci/aws-cli@3.1.5
+  ansible: orbss/ansible-playbook@0.0.5
+  ruby: circleci/ruby@2.0.0
+
+
 jobs:
-  test:
-    docker:
-      - image: cimg/base:stable
-    steps:
-      - checkout
-      # Replace this with a real test runner invocation
-      - run:
-          name: Run tests
-          command: echo 'replace me with real tests!' && false
-  build:
-    docker:
-      - image: cimg/base:stable
-    steps:
-      - checkout
-      # Replace this with steps to build a package, or executable
-      - run:
-          name: Build an artifact
-          command: touch example.txt
-      - store_artifacts:
-          path: example.txt
-  deploy:
-    docker:
-      - image: cimg/base:stable
-    steps:
-      # Replace this with steps to deploy to users
-      - run:
-          name: deploy
-          command: '#e.g. ./deploy.sh'
+
+  execute-ansible:
+    executor: ansible/default        
+    steps: 
+    - checkout
+    # - attach_workspace:
+    #     at: .
+    # - run: |
+    #       cat bash.env >> $BASH_ENV    
+    # - add_ssh_keys:
+    #     fingerprints:
+    #       - "${KEY_FINGERPRINT}"
+    - ansible/install:
+        version: 2.10.7
+    - ansible/playbook: 
+        playbook: ansible/site.yml
+        playbook-options: "-i ansible/inventory"
+  
+  # execute-serverspec:
+  #   executor: ruby/default
+  #   steps:
+  #     - checkout
+  #     # サーバーのセットアップ
+  #     - run:
+  #         name: bundle install
+  #         command: |
+  #           cd serverspec
+  #           gem list -e rails
+  #           bundle install --path vendor/bundle
+
+  #     # Serverspecのテストを実行
+  #     - run:
+  #         name: execute serverspec
+  #         command: |
+  #           cd serverspec
+  #           bundle exec rake spec
+
 workflows:
-  example:
+  CircleCItest:
     jobs:
-      - test
-      - build:
+      # - cfn-lint
+      # - execute-cfn:
+      #     requires:
+      #       - cfn-lint
+      # - execute-ansible:
+      #     requires:
+      #       - execute-cfn
+      - execute-serverspec:
           requires:
-            - test
-      - deploy:
-          requires:
-            - test
+            - execute-ansible
