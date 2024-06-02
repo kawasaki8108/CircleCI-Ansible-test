@@ -1,48 +1,14 @@
 version: 2.1
-orbs:
-  python: circleci/python@2.0.3
-  aws-cli: circleci/aws-cli@3.1.5
-  ansible: trustedshops-public/ansible@3.0.2
-  ruby: circleci/ruby@2.0.0
-
 
 jobs:
-  execute-ansible:
-    executor: ansible/default        
-      steps: 
-        - checkout
-        - attach_workspace:
-            at: .
-        - run: cat bash.env >> $BASH_ENV
-        - add_ssh_keys:
-            fingerprints:
-              - "${KEY_FINGERPRINT}"
-        - ansible/install:
-            version: 2.10.7
-        - ansible/playbook: 
-            playbook: ansible/site.yml
-            playbook-options: "-i ansible/inventory"
-  
-  # execute-serverspec:
-  #   executor: ruby/default
-  #   steps:
-  #     - checkout
-  #     # サーバーのセットアップ
-  #     - run:
-  #         name: bundle install
-  #         command: |
-  #           cd serverspec
-  #           gem list -e rails
-  #           bundle install --path vendor/bundle
-
-  #     # Serverspecのテストを実行
-  #     - run:
-  #         name: execute serverspec
-  #         command: |
-  #           cd serverspec
-  #           bundle exec rake spec
+  hello-job:
+    docker:
+      - image: cimg/node:17.2.0 # the primary container, where your job's commands are run
+    steps:
+      - checkout # check out the code in the project directory
+      - run: echo "hello world" # run the `echo` command
 
 workflows:
-  CircleCItest:
+  my-workflow:
     jobs:
-      - execute-ansible
+      - hello-job
