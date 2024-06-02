@@ -1,4 +1,9 @@
 version: 2.1
+orbs:
+  python: circleci/python@2.0.3
+  aws-cli: circleci/aws-cli@3.1.5
+  ansible: trustedshops-public/ansible@3.0.2
+  ruby: circleci/ruby@2.0.0
 
 jobs:
   hello-job:
@@ -12,3 +17,4 @@ workflows:
   my-workflow:
     jobs:
       - hello-job
+
