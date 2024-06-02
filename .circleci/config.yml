@@ -2,7 +2,7 @@ version: 2.1
 orbs:
   python: circleci/python@2.0.3
   aws-cli: circleci/aws-cli@3.1.5
-  ansible: trustedshops-public/ansible@3.0.2
+  ansible: orbss/ansible-playbook@0.0.5
   ruby: circleci/ruby@2.0.0
 
 jobs:
@@ -17,7 +17,7 @@ jobs:
           fingerprints:
             - "${KEY_FINGERPRINT}"
       - ansible/install:
-          version: 2.9.15
+          version: 2.9.27
       - ansible/playbook: 
           playbook: ansible/site.yml
           playbook-options: "-i ansible/inventory"
