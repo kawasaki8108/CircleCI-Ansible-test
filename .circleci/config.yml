@@ -16,6 +16,9 @@ jobs:
       - add_ssh_keys:
           fingerprints:
             - "${KEY_FINGERPRINT}"
+      - run:
+          name: Copy SSH Config
+          command: cp sshconfig/config ~/.ssh/
       - ansible/install:
           version: 2.9.27
       - ansible/playbook: 
