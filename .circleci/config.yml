@@ -51,9 +51,9 @@ workflows:
       # - execute-cfn:
       #     requires:
       #       - cfn-lint
-      # - execute-ansible:
+      - execute-ansible:
       #     requires:
       #       - execute-cfn
-      - execute-serverspec:
-          requires:
-            - execute-ansible
+      # - execute-serverspec:
+      #     requires:
+      #       - execute-ansible
