@@ -12,13 +12,13 @@ jobs:
     executor: ansible/default        
     steps: 
     - checkout
-    # - attach_workspace:
-    #     at: .
-    # - run: |
-    #       cat bash.env >> $BASH_ENV    
-    # - add_ssh_keys:
-    #     fingerprints:
-    #       - "${KEY_FINGERPRINT}"
+    - attach_workspace:
+        at: .
+    - run: |
+          cat bash.env >> $BASH_ENV    
+    - add_ssh_keys:
+        fingerprints:
+          - "${KEY_FINGERPRINT}"
     - ansible/install:
         version: 2.10.7
     - ansible/playbook: 
