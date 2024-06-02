@@ -1,0 +1,76 @@
+---
+- name: create database.yml
+  become: true
+  ansible.builtin.template:
+    src: database.yml.j2
+    dest: "{{ app_dir }}/config/database.yml"
+  register: database_yml
+
+#環境構築
+- name: bin/setup
+  ansible.builtin.command: bash -lc "bin/setup"
+  args: 
+    chdir: "{{ app_dir }}"
+  when: database_yml.changed == true
+
+- name: edit application.rb
+  become: true
+  ansible.builtin.template:
+    src: application.rb.j2
+    dest: "{{ app_dir }}/config/application.rb"
+  register: application_rb
+
+
+- name: set puma.service for appserver
+  become: true
+  ansible.builtin.copy:
+    src: puma.service
+    dest: /etc/systemd/system/puma.service
+    backup: yes
+  register: puma_service
+  # notify: restart puma
+
+- name: asset precompile
+  ansible.builtin.command: bash -lc "rails assets:precompile"
+  args: 
+    chdir: "{{ app_dir }}"
+
+# - name: edit puma.rb
+#   become: yes
+#   template:
+#     src: puma.rb.j2
+#     dest: "{{ app_dir }}/config/puma.rb"
+
+- name: edit development.rb
+  become: true
+  template:
+    src: development.rb.j2
+    dest: "{{ app_dir }}/config/environments/development.rb"
+  register: development_rb
+
+
+# - name: edit storage.yml
+#   become: yes
+#   template:
+#     src: storage.yml.j2
+#     dest: "{{ app_dir }}/config/storage.yml"
+
+
+
+#サービス有効化
+- name: puma service activate
+  become: true
+  ansible.builtin.service:
+    name: puma.service
+    state: started
+    enabled: true
+
+# - name: restart puma.service
+#   become: true
+#   ansible.builtin.service:
+#     name: puma.service
+#     state: restarted
+#   when: database_yml.changed == true
+#     or  application_rb.changed == true
+#     or  puma_service.changed == true
+#     or  development_rb.changed == true

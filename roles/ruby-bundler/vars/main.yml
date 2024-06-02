@@ -1,0 +1,5 @@
+ruby_version: 3.2.3
+node_version: v17.9.1
+yarnversion: 1.22.19 #yarn_versionと記載するとansibleが認識しなかったため
+rails_version: 7.0.4
+bundler_version: 2.3.14

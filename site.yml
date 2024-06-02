@@ -1,0 +1,25 @@
+---
+- hosts: webappservers
+  gather_facts: true
+  roles: 
+    # - yum-update
+    # - git
+    # - ruby-bundler
+    # - mysql
+    # - app_clone
+    - appserver-env-setup #bin/setupのためにdatabase.ymlの設定もふくむ
+    - webserver-env-setup #nginxの設定
+
+    #railsはアプリケーションデプロイ時にGemで指定verがインストールされる
+
+  # vars:
+  #   app_dir: /var/www/raisetech-live8-sample-app
+  vars:
+      now_date: "{{ ansible_date_time.date }}"
+      public_ipv4: "$(curl https://checkip.amazonaws.com/)"
+      app_dir: /home/ec2-user/raisetech-live8-sample-app
+      # AWS_RDS_USERNAME: admin
+      AWS_RDS_PW: Kawasaki1002cfn
+      AWS_RDS_ENDPOINT: terraform-20240529194938236400000002.c7nzmtxyau6j.ap-northeast-1.rds.amazonaws.com
+      AWS_ALB_DNS: alb-tf-1777189806.ap-northeast-1.elb.amazonaws.com
+

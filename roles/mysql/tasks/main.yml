@@ -1,0 +1,55 @@
+---
+- name: mariadb exists check
+  ansible.builtin.command: bash -lc "rpm -qa | grep -i mariadb"
+  register: mariadb_exists
+  changed_when: no
+  ignore_errors: true
+
+- name: remove mariadb
+  become: true
+  ansible.builtin.command: bash -lc "yum remove mariadb-* -y"
+  when: mariadb_exists.rc == 0
+
+- name: remove mysql-server
+  become: true
+  ansible.builtin.yum:
+    name: mysql-server
+    state: absent
+
+- name: import gpg-key
+  become: true
+  ansible.builtin.rpm_key:
+    state: present
+    key: https://repo.mysql.com/RPM-GPG-KEY-mysql-2023
+
+- name: mysql-repo exists check
+  ansible.builtin.command: bash -lc "rpm -qa | grep -i mysql"
+  register: mysql_repo_exists
+  changed_when: no
+  ignore_errors: true
+
+- name: install mysql repository
+  become: true
+  ansible.builtin.command: bash -lc "yum install https://dev.mysql.com/get/mysql80-community-release-el7-11.noarch.rpm -y"
+  register: mysql_installed
+  when: mysql_repo_exists.rc == 1
+
+- name: install mysql-devel
+  become: true
+  ansible.builtin.yum:
+    name: mysql-community-devel
+    state: present
+  when: mysql_installed.changed == true
+
+- name: install mysql-client
+  become: true
+  ansible.builtin.yum:
+    name: mysql-community-client
+    state: present
+  when: mysql_installed.changed == true
+
+
+
+
+
+

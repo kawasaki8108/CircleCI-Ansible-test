@@ -1,0 +1,25 @@
+---
+- name: git clone sample-app
+  ansible.builtin.git:
+    repo: https://github.com/yuta-ushijima/raisetech-live8-sample-app.git
+    dest: "{{ app_dir }}"
+    force: yes
+
+- name: webpack install
+  ansible.builtin.command: bash -lc "npm install webpack-cli --save-dev"
+  args: 
+    chdir: "{{ app_dir }}"
+
+- name: Install ImageMagick
+  become: true
+  ansible.builtin.yum:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - ImageMagick
+    - ImageMagick-devel
+
+- name: bundle install
+  ansible.builtin.command: bash -lc "bundle install"
+  args: 
+    chdir: "{{ app_dir }}"

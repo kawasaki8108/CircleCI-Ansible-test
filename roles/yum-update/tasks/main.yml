@@ -1,0 +1,12 @@
+---
+# tasks file for yum-update
+# 参考記事
+# https://docs.ansible.com/ansible/latest/collections/ansible/builtin/async_status_module.html
+# https://labor.ewigleere.net/2020/11/06/ansible_execute_yum_update/
+
+- name: yum-update
+  become: true
+  yum:
+    name: '*'
+    state: latest
+    lock_timeout: 180

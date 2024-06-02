@@ -1,0 +1,7 @@
+---
+- name: restart puma.service
+  become: true
+  ansible.builtin.service:
+    name: puma.service
+    state: restarted
+  register: puma-restarted

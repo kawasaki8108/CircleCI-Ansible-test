@@ -1,0 +1,8 @@
+---
+# tasks file for git
+- name: install_git
+  become: true
+  ansible.builtin.yum:
+    name:
+      - git
+    state: latest

@@ -1,0 +1,43 @@
+---
+#Amazon Linux Extrasのトピックnginxを有効にする
+- name: Enable amzn2extra-nginx repository
+  become: true
+  ansible.builtin.shell: amazon-linux-extras enable nginx1
+  changed_when: false
+
+#/etc/yum.repos.d配下に入ったnginxのパッケージをインストール
+- name: Install Nginx packages from amazon-linux-extras
+  become: true
+  ansible.builtin.yum:
+    name: nginx
+    state: present
+    # state: absent
+
+#ファイルの置き換え
+- name: Change nginx index.html page
+  become: true
+  ansible.builtin.template:
+    src: index.html.j2                      #置き換え元のファイル（files配下）
+    dest: /usr/share/nginx/html/index.html  #置き換え先のフルパス
+    backup: yes                             #置き換え先のバックアップを同じディレクトリで取得
+  notify: restart nginx                     #下部のhandlersで定義した名前
+
+- name: edit nginx.conf
+  become: true
+  ansible.builtin.template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/nginx.conf
+    backup: true
+  notify: restart nginx  
+
+#サービス有効化
+# - name: nginx service activate
+#   become: true
+#   ansible.builtin.service:
+#     name: nginx
+#     state: started
+#     enabled: true
+#設定ファイルなどに変更があったときだけ稼働させるものの定義（taskと同階層にhandlersを書く）
+
+
+
