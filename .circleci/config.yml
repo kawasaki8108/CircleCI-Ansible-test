@@ -1,28 +1,27 @@
 version: 2.1
 orbs:
-    python: circleci/python@2.0.3
-    aws-cli: circleci/aws-cli@3.1.5
-    ansible: trustedshops-public/ansible@3.0.2
-    ruby: circleci/ruby@2.0.0
+  python: circleci/python@2.0.3
+  aws-cli: circleci/aws-cli@3.1.5
+  ansible: trustedshops-public/ansible@3.0.2
+  ruby: circleci/ruby@2.0.0
 
 
 jobs:
-
-    execute-ansible:
-        executor: ansible/default        
-        steps: 
-            - checkout
-            - attach_workspace:
-                    at: .
-            - run: cat bash.env >> $BASH_ENV
-            - add_ssh_keys:
-                    fingerprints:
-                        - "${KEY_FINGERPRINT}"
-            - ansible/install:
-                    version: 2.10.7
-            - ansible/playbook: 
-                    playbook: ansible/site.yml
-                    playbook-options: "-i ansible/inventory"
+  execute-ansible:
+    executor: ansible/default        
+      steps: 
+        - checkout
+        - attach_workspace:
+            at: .
+        - run: cat bash.env >> $BASH_ENV
+        - add_ssh_keys:
+            fingerprints:
+              - "${KEY_FINGERPRINT}"
+        - ansible/install:
+            version: 2.10.7
+        - ansible/playbook: 
+            playbook: ansible/site.yml
+            playbook-options: "-i ansible/inventory"
   
   # execute-serverspec:
   #   executor: ruby/default
@@ -44,6 +43,6 @@ jobs:
   #           bundle exec rake spec
 
 workflows:
-    CircleCItest:
-        jobs:
-            - execute-ansible:
+  CircleCItest:
+    jobs:
+      - execute-ansible
