@@ -15,7 +15,7 @@ jobs:
       # - run: cat bash.env >> $BASH_ENV
       - add_ssh_keys:
           fingerprints:
-            - SHA256:VqNxLw3cu4KutsL0gB1Q0xBJaJQYxNkKHsAR0aUTv5E
+            - "${KEY_FINGERPRINT}"
       - ansible/install:
           version: 2.9.27
       - ansible/playbook: 
