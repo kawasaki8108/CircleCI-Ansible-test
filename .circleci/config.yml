@@ -47,13 +47,4 @@ jobs:
 workflows:
   CircleCItest:
     jobs:
-      # - cfn-lint
-      # - execute-cfn:
-      #     requires:
-      #       - cfn-lint
       - execute-ansible:
-      #     requires:
-      #       - execute-cfn
-      # - execute-serverspec:
-      #     requires:
-      #       - execute-ansible
