@@ -16,6 +16,13 @@ jobs:
       - add_ssh_keys:
           fingerprints:
             - "${KEY_FINGERPRINT}"
+      - run: python --version
+      - run: python3 --version
+      - run: pip --version
+      - run: 
+          name: install ansible
+          command: pip install ansible
+      - run: ansible --version
       # - run:
       #     name: Copy SSH Config
       #     command: cp sshconfig/config ~/.ssh/
