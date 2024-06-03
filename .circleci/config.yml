@@ -51,4 +51,4 @@ jobs:
 workflows:
   CircleCItest:
     jobs:
-      - execute-ansible
+      - ansible/provision
