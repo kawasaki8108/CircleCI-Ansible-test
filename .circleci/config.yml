@@ -19,8 +19,8 @@ jobs:
       # - run:
       #     name: Copy SSH Config
       #     command: cp sshconfig/config ~/.ssh/
-      - ansible/install:
-          version: 2.9.27  # Ansibleのバージョンを指定
+      # - ansible/install:
+      #     version: 2.9.27  # Ansibleのバージョンを指定
       - run:
           name: Execute Ansible Playbook
           command: ansible-playbook -i inventory
