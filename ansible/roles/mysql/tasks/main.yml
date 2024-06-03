@@ -47,15 +47,3 @@
     name: mysql-community-client
     state: present
   when: mysql_installed.changed == true
-
-#mysqlpw
-- name: "mysql-pw {{ AWS_RDS_PW }}"
-- name: "publicip {{ public_ipv4 }}"
-
-
-
-
-
-
-
-
