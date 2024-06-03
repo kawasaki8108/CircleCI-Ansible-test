@@ -6,8 +6,12 @@ orbs:
   ruby: circleci/ruby@2.0.0
 
 jobs:
-  execute-ansible:
-    executor: ansible/default        
+  - ansible/provision:
+      ansible_version: 2.9.15
+    # execute-ansible:
+      executor: ansible/default
+      inventory: ansible/inventory/target.yml
+      playbook: ansible/site.yml
     steps: 
       - checkout
       - attach_workspace:
@@ -19,11 +23,8 @@ jobs:
       # - run:
       #     name: Copy SSH Config
       #     command: cp sshconfig/config ~/.ssh/
-      - ansible/ansible_version: 2.9.27
       # - ansible/install:
       #     version: 2.9.27
-      - ansible/inventory: ansible/inventory/target.yml
-      - ansible/playbook: ansible/site.yml
       # - ansible/playbook:
       #     playbook: ansible/site.yml
       #     playbook-options: "-i ansible/inventory"
