@@ -78,7 +78,7 @@
 
 - name: Install ruby
   ansible.builtin.command: bash -lc "rbenv install {{ ruby_version }} --skip-existing"
-  # timeout: 900
+  timeout: 900
   when: ruby_exists is failed
 
 - name: ruby grobal set
@@ -159,13 +159,13 @@
   changed_when: no
   ignore_errors: true
 
-- name: install bundler
+- name: "install bundler {{ bundler_version }}"
   # ansible.builtin.command: bash -lc "gem install bundler -v {{ bundler_version }}"
   ansible.builtin.gem: 
     name: bundler
     version: "{{ bundler_version }}"
     user_install: no
-  # timeout: 300
+  timeout: 300
   when: bundler_exists is failed
 
 
