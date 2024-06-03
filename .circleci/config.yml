@@ -30,7 +30,7 @@ jobs:
       #     version: 2.9.27  # Ansibleのバージョンを指定
       - run:
           name: Execute Ansible Playbook
-          command: ansible-playbook -i inventory
+          command: ansible-playbook -i inventory ansible/site.yml
           
   # - ansible/provision:
   #     ansible_version: 2.9.15
