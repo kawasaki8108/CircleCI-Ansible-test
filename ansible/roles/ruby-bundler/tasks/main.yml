@@ -23,8 +23,8 @@
 #rbenv
 #-------
 - name: check rbenv install
-  ansible.builtin.shell: bash -lc "rbenv --version"
-  # ansible.builtin.shell: bash -lc "/home/ec2-user/.rbenv/bin/rbenv --version"
+  ansible.builtin.command: bash -lc "rbenv --version"
+  # ansible.builtin.command: bash -lc "/home/ec2-user/.rbenv/bin/rbenv --version"
   register: rbenv_exists
   changed_when: no
   ignore_errors: true
@@ -52,14 +52,14 @@
   when: rbenv_exists is failed
 
 - name: source /home/ec2-user/.bashrc 
-  ansible.builtin.shell: bash -lc "source /home/ec2-user/.bashrc" 
+  ansible.builtin.command: bash -lc "source /home/ec2-user/.bashrc" 
   changed_when: false
 
 #-------
 #ruby
 #-------
 - name: check ruby install
-  ansible.builtin.shell: bash -lc "rbenv version | grep {{ ruby_version }}"
+  ansible.builtin.command: bash -lc "rbenv version | grep {{ ruby_version }}"
   register: ruby_exists
   changed_when: false
   ignore_errors: true
@@ -72,18 +72,18 @@
 
 - name: Install ruby-build2
   become: true
-  ansible.builtin.shell: bash -lc "/home/ec2-user/.rbenv/plugins/ruby-build/install.sh"
+  ansible.builtin.command: bash -lc "/home/ec2-user/.rbenv/plugins/ruby-build/install.sh"
   #-l：bashをログインシェルとした場合と同様に起動。-c：""内をコマンドとして実行する
   when: ruby_exists is failed
 
 - name: Install ruby
-  ansible.builtin.shell: bash -lc "rbenv install {{ ruby_version }} --skip-existing"
+  ansible.builtin.command: bash -lc "rbenv install {{ ruby_version }} --skip-existing"
   # timeout: 900
   when: ruby_exists is failed
 
 - name: ruby grobal set
   # become: true
-  ansible.builtin.shell: bash -lc "rbenv global {{ ruby_version }}"
+  ansible.builtin.command: bash -lc "rbenv global {{ ruby_version }}"
   #この段階でgemとbundlerがインストールされている状態（~/.rbenv/shims/にてパス通っている）
   when: ruby_exists is failed
 
@@ -91,34 +91,34 @@
 # nodejs
 # -----------------------------------------------------
 - name: check node.js install
-  ansible.builtin.shell: bash -lc "node --version | grep {{ node_version }}"
+  ansible.builtin.command: bash -lc "node --version | grep {{ node_version }}"
   register: nodejs_exists
   changed_when: no
   ignore_errors: true
 
 - name: Setup nvm and nodejs1
   # become: true
-  ansible.builtin.shell: bash -lc "curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash"
+  ansible.builtin.command: bash -lc "curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash"
   when: nodejs_exists is failed
 
 - name: Setup nvm and nodejs2
   # become: true
-  ansible.builtin.shell: bash -lc "source ~/.bashrc"
+  ansible.builtin.command: bash -lc "source ~/.bashrc"
   when: nodejs_exists is failed
 
 - name: Setup nvm and nodejs3
   # become: true
-  ansible.builtin.shell: bash -lc "nvm install {{ node_version }}"
+  ansible.builtin.command: bash -lc "nvm install {{ node_version }}"
   when: nodejs_exists is failed
 
 - name: Setup nvm and nodejs4
   # become: true
-  ansible.builtin.shell: bash -lc "nvm use {{ node_version }}"
+  ansible.builtin.command: bash -lc "nvm use {{ node_version }}"
   when: nodejs_exists is failed
 
 - name: Setup nvm and nodejs
   # become: true
-  ansible.builtin.shell: bash -lc "nvm alias default {{ node_version }}"
+  ansible.builtin.command: bash -lc "nvm alias default {{ node_version }}"
   when: nodejs_exists is failed
 
 
@@ -126,41 +126,41 @@
 # yarn
 # -----------------------------------------------------
 - name: check yarn install
-  ansible.builtin.shell: yarn --version
+  ansible.builtin.command: yarn --version
   register: yarn_exists
   changed_when: no
   ignore_errors: true
 
 # - name: Setup Yum repo for yarn
 #   become: true
-#   shell: "curl -sL https://dl.yarnpkg.com/rpm/yarn.repo | sudo tee /etc/yum.repos.d/yarn.repo"
+#   command: "curl -sL https://dl.yarnpkg.com/rpm/yarn.repo | sudo tee /etc/yum.repos.d/yarn.repo"
 #   when: yarn_exists is failed
 
 - name: yarn install
-  ansible.builtin.shell: bash -lc "npm install --global yarn"
+  ansible.builtin.command: bash -lc "npm install --global yarn"
   when: yarn_exists is failed
 
 - name: check yarn install version
-  ansible.builtin.shell: bash -lc "yarn --version  | grep {{ yarnversion }}"
+  ansible.builtin.command: bash -lc "yarn --version  | grep {{ yarnversion }}"
   register: yarn_exists_wedefined_version
   changed_when: no
   ignore_errors: true
 
 - name: set yarn version
-  ansible.builtin.shell: bash -lc "yarn set version {{ yarnversion }}"
+  ansible.builtin.command: bash -lc "yarn set version {{ yarnversion }}"
   when: yarn_exists_wedefined_version is failed
 
 # -----------------------------------------------------
 # bundler
 # -----------------------------------------------------
 - name: check bundler install
-  ansible.builtin.shell: bash -lc "bundler version | grep {{ bundler_version }}"
+  ansible.builtin.command: bash -lc "bundler version | grep {{ bundler_version }}"
   register: bundler_exists
   changed_when: no
   ignore_errors: true
 
-- name: "install bundler {{ bundler_version }}"
-  # ansible.builtin.shell: bash -lc "gem install bundler -v {{ bundler_version }}"
+- name: install bundler {{ bundler_version }}
+  # ansible.builtin.command: bash -lc "gem install bundler -v {{ bundler_version }}"
   ansible.builtin.gem: 
     name: bundler
     version: "{{ bundler_version }}"
