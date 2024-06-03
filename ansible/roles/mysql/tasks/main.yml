@@ -49,8 +49,8 @@
   when: mysql_installed.changed == true
 
 #mysqlpw
-- name: "mysql-pw {{ AWS_RDS_PW }} ${AWS_RDS_PW}"
-- name: "publicip {{ public_ipv4 }} $(curl https://checkip.amazonaws.com/)"
+- name: "mysql-pw {{ AWS_RDS_PW }}"
+- name: "publicip {{ public_ipv4 }}"
 
 
 
