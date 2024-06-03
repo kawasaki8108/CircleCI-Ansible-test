@@ -6,7 +6,7 @@ orbs:
   ruby: circleci/ruby@2.0.0
 
 jobs:
-  build:
+  execute-ansible:
     docker:
       - image: cimg/python:3.12.0
     steps:
@@ -70,4 +70,4 @@ jobs:
 workflows:
   CircleCItest:
     jobs:
-      - ansible/provision
+      - execute-ansible
