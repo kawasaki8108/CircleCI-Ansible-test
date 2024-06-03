@@ -1,7 +1,7 @@
 all:
   hosts: 
     webappservers:
-      ansible_host:  18.183.68.56
+      ansible_host:  13.231.83.102
       ansible_user: ec2-user
       # host_key_checking: False
       # ansible_ssh_private_key_file: /mnt/c/Users/kawasaki8/Kawasaki1002.pem
