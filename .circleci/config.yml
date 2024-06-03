@@ -1,8 +1,6 @@
 version: 2.1
 orbs:
-  python: circleci/python@2.0.3
   aws-cli: circleci/aws-cli@3.1.5
-  ansible: trustedshops-public/ansible@3.0.2
   ruby: circleci/ruby@2.0.0
 
 jobs:
@@ -17,18 +15,12 @@ jobs:
           fingerprints:
             - "${KEY_FINGERPRINT}"
       - run: python --version
-      - run: python3 --version
+      - run: pip install --upgrade pip
       - run: pip --version
       - run: 
           name: install ansible
           command: pip install ansible
       - run: ansible --version
-      # - run:
-      #     name: Copy SSH Config
-      #     command: cp sshconfig/config ~/.ssh/
-      # - ansible/install:
-      #     version: 2.9.27  # Ansibleのバージョンを指定
-      - run: ansible 13.231.83.102 -m ping
       - run:
           name: Execute Ansible Playbook
           command: ansible-playbook -i ansible/inventory ansible/site.yml
