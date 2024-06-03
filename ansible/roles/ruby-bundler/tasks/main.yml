@@ -77,7 +77,6 @@
   when: ruby_exists is failed
 
 - name: Install ruby
-  # become: true
   ansible.builtin.command: bash -lc "rbenv install {{ ruby_version }} --skip-existing"
   timeout: 900
   when: ruby_exists is failed
