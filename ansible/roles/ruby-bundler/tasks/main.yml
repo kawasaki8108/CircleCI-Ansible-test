@@ -159,7 +159,7 @@
   changed_when: no
   ignore_errors: true
 
-- name: install bundler {{ bundler_version }}
+- name: install bundler
   # ansible.builtin.command: bash -lc "gem install bundler -v {{ bundler_version }}"
   ansible.builtin.gem: 
     name: bundler
