@@ -28,10 +28,10 @@ jobs:
       #     command: cp sshconfig/config ~/.ssh/
       # - ansible/install:
       #     version: 2.9.27  # Ansibleのバージョンを指定
-      - run: ansible 13.231.83.102 -m ping -i inventory
+      - run: ansible 13.231.83.102 -m ping
       - run:
           name: Execute Ansible Playbook
-          command: ansible-playbook -i inventory ansible/site.yml
+          command: ansible-playbook -i ansible/inventory ansible/site.yml
           
   # - ansible/provision:
   #     ansible_version: 2.9.15
