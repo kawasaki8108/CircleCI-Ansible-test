@@ -165,7 +165,7 @@
     name: bundler
     version: "{{ bundler_version }}"
     user_install: no
-  timeout: 300
+  # timeout: 300
   when: bundler_exists is failed
 
 
