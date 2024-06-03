@@ -6,12 +6,31 @@ orbs:
   ruby: circleci/ruby@2.0.0
 
 jobs:
-  - ansible/provision:
-      ansible_version: 2.9.15
-    # execute-ansible:
-      executor: ansible/default
-      inventory: ansible/inventory/target.yml
-      playbook: ansible/site.yml
+  build:
+    docker:
+      - image: cimg/python:3.12.0
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - add_ssh_keys:
+          fingerprints:
+            - "${KEY_FINGERPRINT}"
+      # - run:
+      #     name: Copy SSH Config
+      #     command: cp sshconfig/config ~/.ssh/
+      - ansible/install:
+          version: 2.9.27  # Ansibleのバージョンを指定
+      - run:
+          name: Execute Ansible Playbook
+          command: ansible-playbook -i inventory
+          
+  # - ansible/provision:
+  #     ansible_version: 2.9.15
+  #   # execute-ansible:
+  #     executor: ansible/default
+  #     inventory: ansible/inventory/target.yml
+  #     playbook: ansible/site.yml
     # steps: 
     #   - checkout
     #   - attach_workspace:
