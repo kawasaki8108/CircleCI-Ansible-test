@@ -12,14 +12,14 @@ jobs:
       executor: ansible/default
       inventory: ansible/inventory/target.yml
       playbook: ansible/site.yml
-    steps: 
-      - checkout
-      - attach_workspace:
-          at: .
+    # steps: 
+    #   - checkout
+    #   - attach_workspace:
+    #       at: .
       # - run: cat bash.env >> $BASH_ENV
-      - add_ssh_keys:
-          fingerprints:
-            - "${KEY_FINGERPRINT}"
+      # - add_ssh_keys:
+      #     fingerprints:
+      #       - "${KEY_FINGERPRINT}"
       # - run:
       #     name: Copy SSH Config
       #     command: cp sshconfig/config ~/.ssh/
