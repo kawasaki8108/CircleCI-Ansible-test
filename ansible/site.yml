@@ -2,13 +2,13 @@
 - hosts: webappservers
   gather_facts: true
   roles: 
-    - yum-update
-    - git
+    # - yum-update
+    # - git
     - ruby-bundler
-    - mysql
-    - app_clone
-    - appserver-env-setup #bin/setupのためにdatabase.ymlの設定もふくむ
-    - webserver-env-setup #nginxの設定
+    # - mysql
+    # - app_clone
+    # - appserver-env-setup #bin/setupのためにdatabase.ymlの設定もふくむ
+    # - webserver-env-setup #nginxの設定
 
     #railsはアプリケーションデプロイ時にGemで指定verがインストールされる
 
