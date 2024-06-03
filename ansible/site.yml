@@ -4,8 +4,8 @@
   roles: 
     # - yum-update
     # - git
-    - ruby-bundler
-    # - mysql
+    # - ruby-bundler
+    - mysql
     # - app_clone
     # - appserver-env-setup #bin/setupのためにdatabase.ymlの設定もふくむ
     # - webserver-env-setup #nginxの設定
