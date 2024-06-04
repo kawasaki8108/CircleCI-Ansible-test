@@ -36,7 +36,7 @@ jobs:
       - run: pip --version
       - run: 
           name: install ansible
-          command: pip install ansible
+          command: pip install ansible==2.16.7 #バージョン指定なしの場合で2.17がインストールされたときにruby環境構築用の各種パッケージがyumモジュールで入らなかったのでバージョン指定しました
       - run: ansible --version
       - run:
           name: Execute Ansible Playbook
