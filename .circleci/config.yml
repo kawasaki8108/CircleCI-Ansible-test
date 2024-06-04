@@ -87,4 +87,5 @@ jobs:
 workflows:
   CircleCItest:
     jobs:
+      - cfn-lint
       - execute-ansible
