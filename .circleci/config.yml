@@ -4,6 +4,23 @@ orbs:
   ruby: circleci/ruby@2.0.0
 
 jobs:
+  cfn-lint:
+    # executor: python/default　実行環境としてOrb由来使わずDockerイメージを使うので無効化
+    docker:
+      - image: cimg/python:3.12.0
+
+    steps:
+      - checkout
+      - run: python --version
+      - run: pip install --upgrade pip
+      - run: pip --version
+      - run: pip install cfn-lint
+      - run:
+          name: run cfn-lint
+          command: |
+            cfn-lint -i W3010 -t cloudformation/*.yml
+  
+  
   execute-ansible:
     docker:
       - image: cimg/python:3.12.0
