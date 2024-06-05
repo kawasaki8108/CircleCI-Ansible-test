@@ -1,6 +1,6 @@
 version: 2.1
 orbs:
-  aws-cli: circleci/aws-cli@3.1.5
+  aws-cli: circleci/aws-cli@4.1.3
   ruby: circleci/ruby@2.0.0
 
 jobs:
@@ -19,7 +19,43 @@ jobs:
           name: run cfn-lint
           command: |
             cfn-lint -i W3010 -t cloudformation/*.yml
-  
+
+  execute-cfn:
+    executor: aws-cli/default
+    steps:
+      - checkout
+      - aws-cli/install:
+          profile_name: aws-cli-install
+      - aws-cli/assume_role_with_web_identity:
+          profile_name: ec2-s3-fullaccess
+          role_arn: ${AWS_ROLE_ARN}
+
+      # - aws-cli/setup:
+      #     aws-access-key-id: AWS_ACCESS_KEY_ID
+      #     aws-secret-access-key: AWS_SECRET_ACCESS_KEY
+      #     aws-region: AWS_DEFAULT_REGION
+      - run:
+          name: cloudformation deploy
+          command: |
+            set -x
+            aws cloudformation deploy --template-file cloudformation/vpc_01.yml --stack-name vpc_01
+            aws cloudformation deploy --template-file cloudformation/sg_02.yml --stack-name sg_02
+            aws cloudformation deploy --template-file cloudformation/ec2_03.yml --stack-name ec2_03  --capabilities CAPABILITY_IAM
+            aws cloudformation deploy --template-file cloudformation/rds-04.yml --stack-name rds-04
+            aws cloudformation deploy --template-file cloudformation/alb-05.yml --stack-name alb-05
+            aws cloudformation deploy --template-file cloudformation/s3-06.yml --stack-name s3-06
+      - run: 
+          name: set AWS_ALB_DNS
+          command: |
+            set -x
+            echo export AWS_ALB_DNS="$(aws cloudformation describe-stacks --stack-name alb-05 | jq -r '.Stacks[] | .Outputs[] | select(.OutputKey == "LoadBalancerDNSName")| .OutputValue')" >> $BASH_ENV    
+            source $BASH_ENV 
+      - run: |
+          cp $BASH_ENV bash.env
+      - persist_to_workspace:
+          root: .
+          paths:
+            - bash.env
   
   execute-ansible:
     docker:
