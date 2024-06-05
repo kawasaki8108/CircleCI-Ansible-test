@@ -50,42 +50,6 @@ Resources:
             Principal:
               Service: ec2.amazonaws.com
 
-  S3IAMRole:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: ec2.amazonaws.com
-            Action: sts:AssumeRole
-      Path: /
-      Policies: #IAMのS3AccessPolicyにJSON形式に置換されて記述される
-        - PolicyName: S3AccessPolicy
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              - Effect: Allow
-                Action:
-                  - s3:PutObject
-                  - s3:GetObject
-                Resource: !Join ["/", [!GetAtt S3Bucket.Arn, "*"]]
-
-  S3InstanceProfile: #S3IAMRoleで作ったロールをEC2にあてる
-    Type: AWS::IAM::InstanceProfile
-    Properties:
-      Path: /
-      Roles:
-        - !Ref S3IAMRole
-#以下の記述で同じregion内のインスタンスにIAMロールをアタッチしようと思いましたが、無理でした。
-#ＥＣ２インスタンス作成時に適用しないといけないみたいです。
-  # EC2Instance:
-  #   Type: 'AWS::EC2::Instance'
-  #   Properties:
-  #     IamInstanceProfile:
-  #       !Ref S3InstanceProfile
-
 
 Outputs:
   S3BucketName:
