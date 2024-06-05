@@ -14,7 +14,7 @@ Parameters:
   NameBase:
     Description: this is base name
     Type: String
-    Default: lecture10
+    Default: lecture13
 
 
 Resources:
