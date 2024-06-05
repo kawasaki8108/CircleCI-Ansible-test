@@ -24,7 +24,7 @@ jobs:
     executor: aws-cli/default
     steps:
       - checkout
-      - aws-cli/install
+      # - aws-cli/install
       - aws-cli/assume_role_with_web_identity:
           profile_name: "OIDC-PROFILE"
           role_arn: arn:aws:iam::143829609078:role/ec2-s3-fullaccess
