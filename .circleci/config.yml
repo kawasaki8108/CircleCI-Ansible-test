@@ -27,9 +27,9 @@ jobs:
       - aws-cli/install
       - aws-cli/assume_role_with_web_identity:
           profile_name: "OIDC-PROFILE"
-          role_arn: "${AWS_ROLE_ARN}"
+          role_arn: arn:aws:iam::143829609078:role/ec2-s3-fullaccess
           region: ap-northeast-1
-      - run: aws cloudformation deploy --template-file cloudformation/vpc-01.yml --stack-name vpc-01 --role-arn "${AWS_ROLE_ARN}"
+      - run: aws cloudformation deploy --template-file cloudformation/vpc-01.yml --stack-name vpc-01 --role-arn arn:aws:iam::143829609078:role/ec2-s3-fullaccess
       - run: aws cloudformation deploy --template-file cloudformation/sg-02.yml --stack-name sg-02
       - run: aws cloudformation deploy --template-file cloudformation/ec2-03.yml --stack-name ec2_03 --capabilities CAPABILITY_IAM
       - run: aws cloudformation deploy --template-file cloudformation/rds-04.yml --stack-name rds-04
