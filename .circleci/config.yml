@@ -25,6 +25,10 @@ jobs:
     steps:
       - checkout
       - aws-cli/install
+      - aws-cli/setup:
+          profile_name: "OIDC-PROFILE"
+          role_arn: arn:aws:iam::143829609078:role/ec2-s3-fullaccess
+          role_session_name: CircleC-IOIDC-session
       - aws-cli/assume_role_with_web_identity:
           profile_name: "OIDC-PROFILE"
           role_arn: arn:aws:iam::143829609078:role/ec2-s3-fullaccess
