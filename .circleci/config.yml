@@ -24,11 +24,17 @@ jobs:
     executor: aws-cli/default
     steps:
       - checkout
-      - aws-cli/setup:
+      - aws-cli/install
+      # - aws-cli/setup:
+      #     profile_name: "OIDC-PROFILE"
+      #     role_arn: "${AWS_ROLE_ARN}"
+      #     role_session_name: "CircleC-OIDC-session"
+          #aws-cli/installは不要(setupメソッドに内包されているため)
+      - aws-cli/assume_role_with_web_identity:
           profile_name: "OIDC-PROFILE"
           role_arn: "${AWS_ROLE_ARN}"
-          role_session_name: "CircleC-IOIDC-session"
-          #aws-cli/installは不要(setupメソッドに内包されているため)
+          role_session_name: CircleC-OIDC-session
+          # region: ap-northeast-1
 
       - run:
           name: Set AWS Profile
