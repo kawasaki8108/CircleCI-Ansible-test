@@ -36,7 +36,7 @@ jobs:
             set -x
             aws cloudformation deploy --template-file cloudformation/vpc-01.yml --stack-name vpc-01 --profile "OIDC-PROFILE"
             aws cloudformation deploy --template-file cloudformation/sg-02.yml --stack-name sg-02 --profile "OIDC-PROFILE"
-            aws cloudformation deploy --template-file cloudformation/ec2-03.yml --stack-name ec2-03 --profile "OIDC-PROFILE"
+            aws cloudformation deploy --template-file cloudformation/ec2-03.yml --stack-name ec2-03 --profile "OIDC-PROFILE" --capabilities CAPABILITY_IAM
             aws cloudformation deploy --template-file cloudformation/rds-04.yml --stack-name rds-04 --profile "OIDC-PROFILE"
             aws cloudformation deploy --template-file cloudformation/alb-05.yml --stack-name alb-05 --profile "OIDC-PROFILE"
             aws cloudformation deploy --template-file cloudformation/s3-06.yml --stack-name s3-06 --profile "OIDC-PROFILE"
