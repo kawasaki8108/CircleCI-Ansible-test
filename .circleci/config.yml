@@ -29,28 +29,17 @@ jobs:
           profile_name: "OIDC-PROFILE"
           role_arn: "${AWS_ROLE_ARN}"
           role_session_name: "CircleC-IOIDC-session"
-      # - aws-cli/assume_role_with_web_identity:
-          # profile_name: "OIDC-PROFILE"
-          # role_arn: "${AWS_ROLE_ARN}"
-          # role_session_name: CircleC-IOIDC-session
-          # region: ap-northeast-1
-      # - run: aws configure
-      # - run: aws cloudformation deploy --template-file cloudformation/vpc-01.yml --stack-name vpc-01
-      # - run: aws cloudformation deploy --template-file cloudformation/sg-02.yml --stack-name sg-02
-      # - run: aws cloudformation deploy --template-file cloudformation/ec2-03.yml --stack-name ec2_03 --capabilities CAPABILITY_IAM
-      # - run: aws cloudformation deploy --template-file cloudformation/rds-04.yml --stack-name rds-04
-      # - run: aws cloudformation deploy --template-file cloudformation/alb-05.yml --stack-name alb-05
-      # - run: aws cloudformation deploy --template-file cloudformation/s3-06.yml --stack-name s3-06
+
       - run:
           name: cloudformation deploy
           command: |
             set -x
             aws cloudformation deploy --template-file cloudformation/vpc-01.yml --stack-name vpc-01 --profile "OIDC-PROFILE"
-            aws cloudformation deploy --template-file cloudformation/sg-02.yml --stack-name sg-02 --role-arn "${AWS_ROLE_ARN}"
-            aws cloudformation deploy --template-file cloudformation/ec2-03.yml --stack-name ec2_03  --capabilities CAPABILITY_IAM
-            aws cloudformation deploy --template-file cloudformation/rds-04.yml --stack-name rds-04
-            aws cloudformation deploy --template-file cloudformation/alb-05.yml --stack-name alb-05
-            aws cloudformation deploy --template-file cloudformation/s3-06.yml --stack-name s3-06
+            aws cloudformation deploy --template-file cloudformation/sg-02.yml --stack-name sg-02 --profile "OIDC-PROFILE"
+            aws cloudformation deploy --template-file cloudformation/ec2-03.yml --stack-name ec2_03 --profile "OIDC-PROFILE"
+            aws cloudformation deploy --template-file cloudformation/rds-04.yml --stack-name rds-04 --profile "OIDC-PROFILE"
+            aws cloudformation deploy --template-file cloudformation/alb-05.yml --stack-name alb-05 --profile "OIDC-PROFILE"
+            aws cloudformation deploy --template-file cloudformation/s3-06.yml --stack-name s3-06 --profile "OIDC-PROFILE"
       - run: 
           name: set AWS_ALB_DNS
           command: |
@@ -64,26 +53,26 @@ jobs:
           paths:
             - bash.env
   
-  execute-ansible:
-    docker:
-      - image: cimg/python:3.12.0
-    steps:
-      - checkout
-      - attach_workspace:
-          at: .
-      - add_ssh_keys:
-          fingerprints:
-            - "${KEY_FINGERPRINT}"
-      - run: python --version
-      - run: pip install --upgrade pip
-      - run: pip --version
-      - run: 
-          name: install ansible
-          command: pip install ansible==9.6.0 #バージョン指定なしの場合で2.17がインストールされたときにruby環境構築用の各種パッケージがyumモジュールで入らなかったのでバージョン指定しました(core:2.16.7)
-      - run: ansible --version
-      - run:
-          name: Execute Ansible Playbook
-          command: ansible-playbook -i ansible/inventory ansible/site.yml
+  # execute-ansible:
+  #   docker:
+  #     - image: cimg/python:3.12.0
+  #   steps:
+  #     - checkout
+  #     - attach_workspace:
+  #         at: .
+  #     - add_ssh_keys:
+  #         fingerprints:
+  #           - "${KEY_FINGERPRINT}"
+  #     - run: python --version
+  #     - run: pip install --upgrade pip
+  #     - run: pip --version
+  #     - run: 
+  #         name: install ansible
+  #         command: pip install ansible==9.6.0 #バージョン指定なしの場合で2.17がインストールされたときにruby環境構築用の各種パッケージがyumモジュールで入らなかったのでバージョン指定しました(core:2.16.7)
+  #     - run: ansible --version
+  #     - run:
+  #         name: Execute Ansible Playbook
+  #         command: ansible-playbook -i ansible/inventory ansible/site.yml
           
   
   # execute-serverspec:
