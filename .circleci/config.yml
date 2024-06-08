@@ -27,7 +27,7 @@ jobs:
       - aws-cli/setup:
           profile_name: "OIDC-PROFILE"
           role_arn: "${AWS_ROLE_ARN}"
-          role_session_name: "CircleC-IOIDC-session"
+          role_session_name: "CircleC-OIDC-session"
           #aws-cli/installは不要(setupメソッドに内包されているため)
 
       - run:
