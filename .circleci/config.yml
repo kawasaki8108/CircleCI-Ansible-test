@@ -31,15 +31,32 @@ jobs:
           role_session_name: "CircleC-IOIDC-session"
 
       - run:
+          name: Set AWS Profile
+          command: echo 'export AWS_PROFILE="OIDC-PROFILE"' >> $BASH_ENV
+
+      - run:
           name: cloudformation deploy
           command: |
-            set -x
-            aws cloudformation deploy --template-file cloudformation/vpc-01.yml --stack-name vpc-01 --profile "OIDC-PROFILE"
-            aws cloudformation deploy --template-file cloudformation/sg-02.yml --stack-name sg-02 --profile "OIDC-PROFILE"
-            aws cloudformation deploy --template-file cloudformation/ec2-03.yml --stack-name ec2-03 --profile "OIDC-PROFILE" --capabilities CAPABILITY_IAM
-            aws cloudformation deploy --template-file cloudformation/rds-04.yml --stack-name rds-04 --profile "OIDC-PROFILE"
-            aws cloudformation deploy --template-file cloudformation/alb-05.yml --stack-name alb-05 --profile "OIDC-PROFILE"
-            aws cloudformation deploy --template-file cloudformation/s3-06.yml --stack-name s3-06 --profile "OIDC-PROFILE"
+            set -x --profile "OIDC-PROFILE"
+            aws cloudformation deploy --template-file cloudformation/vpc-01.yml --stack-name vpc-01
+      #       aws cloudformation deploy --template-file cloudformation/sg-02.yml --stack-name sg-02 --profile "OIDC-PROFILE"
+      #       aws cloudformation deploy --template-file cloudformation/ec2-03.yml --stack-name ec2-03 --profile "OIDC-PROFILE" --capabilities CAPABILITY_IAM
+      #       aws cloudformation deploy --template-file cloudformation/rds-04.yml --stack-name rds-04 --profile "OIDC-PROFILE"
+      #       aws cloudformation deploy --template-file cloudformation/alb-05.yml --stack-name alb-05 --profile "OIDC-PROFILE"
+      #       aws cloudformation deploy --template-file cloudformation/s3-06.yml --stack-name s3-06 --profile "OIDC-PROFILE"
+
+      # - run: 
+      #     name: set environment variable
+      #     command: |
+      #       set -x
+      #       aws cloudformation describe-stacks --stack-name ec2-03  | jq -r '.Stacks[] | .Outputs[] | select(.OutputKey == "EC2PublicIP") | .OutputValue ' 
+      #       echo export EC2_PUBLIC_IP="$(aws ec2 describe-instances | jq '.Reservations[].Instances[] | select( .State.Name=="running" and .Tags[].Value=="CircleciEC2").PublicIpAddress')" >> $BASH_ENV
+      #       echo export AWS_ALB="$(aws elbv2 describe-load-balancers | jq '.LoadBalancers[] | select ( .LoadBalancerName=="CFn-raisetech-alb").DNSName')" >> $BASH_ENV
+      #       echo export S3_IAM_ACCESS_KEY="$(aws cloudformation describe-stacks --stack-name CircleciIAM | jq -r '.Stacks[] | .Outputs[] | select(.OutputKey == "StackIAMAccessKey")| .OutputValue')" >> $BASH_ENV
+      #       echo export S3_IAM_SECRET_ACCESS_KEY="$(aws cloudformation describe-stacks --stack-name CircleciIAM | jq -r '.Stacks[] | .Outputs[] | select(.OutputKey == "StackIAMSecretAccessKey")| .OutputValue')" >> $BASH_ENV
+      #       echo export S3_BUCKET_NAME="$(aws s3 ls | sort -nr | head -n 1 | awk '{print $NF}')" >> $BASH_ENV
+      #       source $BASH_ENV
+      
       - run: 
           name: set AWS_ALB_DNS
           command: |
