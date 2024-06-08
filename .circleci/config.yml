@@ -41,7 +41,7 @@ jobs:
           name: cloudformation deploy
           command: |
             set -x
-            aws cloudformation deploy --template-file cloudformation/vpc-01.yml --stack-name vpc-01
+            aws cloudformation deploy --template-file cloudformation/vpc-01.yml --stack-name vpc-01 --role-session-name CircleC-IOIDC-session
             aws cloudformation deploy --template-file cloudformation/sg-02.yml --stack-name sg-02 --role-arn "${AWS_ROLE_ARN}"
             aws cloudformation deploy --template-file cloudformation/ec2-03.yml --stack-name ec2_03  --capabilities CAPABILITY_IAM
             aws cloudformation deploy --template-file cloudformation/rds-04.yml --stack-name rds-04
