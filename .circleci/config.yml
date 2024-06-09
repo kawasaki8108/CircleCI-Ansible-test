@@ -106,7 +106,7 @@ jobs:
             echo $LoadBalancerDNSName
             echo $S3BucketName
       - run:
-          name: "cat target.yml site.yml"
+          name: "before cat target.yml site.yml"
           command: |
             cat ansible/inventory/target.yml
             cat ansible/site.yml
@@ -118,6 +118,11 @@ jobs:
             sed -i "s/LoadBalancerDNSName/${LoadBalancerDNSName}/g" ansible/site.yml
             sed -i "s/RDSEndpoint/${RDSEndpoint}/g" ansible/site.yml
             sed -i "s/S3BucketName/${S3BucketName}/g" ansible/site.yml
+      - run:
+          name: "after cat target.yml site.yml"
+          command: |
+            cat ansible/inventory/target.yml
+            cat ansible/site.yml
       - run:
           name: Execute Ansible Playbook
           command: ansible-playbook -i ansible/inventory ansible/site.yml
