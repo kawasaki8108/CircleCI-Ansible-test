@@ -47,6 +47,7 @@ Resources:
             VolumeType: gp2         #ボリュームタイプ
             DeleteOnTermination: true       #インスタンス終了時に削除するのか
             VolumeSize: 8          #ディスクサイズ（GiB）
+      IamInstanceProfile: !Ref EC2InstanceProfile
       UserData:
         !Base64 |
           #!/bin/bash
