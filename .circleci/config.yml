@@ -115,6 +115,7 @@ jobs:
           command: |
             set -x
             echo "Setting AWS resources info in Ansible inventory"
+            source env_vars.sh
             pwd
             echo $BASH
             echo $EC2PublicIP
