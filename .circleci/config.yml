@@ -54,29 +54,27 @@ jobs:
           #→persist_to_workspaceでアーティファクトとして保存してansibleのjobでenv_vars.sを読み込み環境変数を受け取る
           command: |
             set -x
-            echo export EC2PublicIP="$(aws cloudformation describe-stacks --stack-name ec2-03  | jq -r '.Stacks[] | .Outputs[] | select(.OutputKey == "EC2PublicIP") | .OutputValue ')" >> env_vars.sh
-            #既存のEC2に対して適用したい場合↓(タグ指定によるもの)
-            EC2PubIP2="$(aws ec2 describe-instances | jq '.Reservations[].Instances[] | select( .Tags[].Value== "lecture13-al2_instance_cfn" and .PublicIpAddress != null) | .PublicIpAddress')"
-            echo "aws ec2 describe-instancesによるもの：${EC2PubIP2}"
-            EC2PubIP2="$(aws ec2 describe-instances | jq '.Reservations[].Instances[] | select( .State.Name=="running" and .Tags[].Value== "lecture13-al2_instance_cfn" and .PublicIpAddress != null) | .PublicIpAddress')"
-            echo "aws ec2 describe-instancesによるものrunning：${EC2PubIP2}"
-            EC2PubIP2="$(aws ec2 describe-instances | jq '.Reservations[].Instances[] | select( .Tags[].Value== "lecture13-al2_instance_cfn" and .PublicIpAddress != null) | .PublicIpAddress')"
-            echo "aws ec2 describe-instancesによるもの：${EC2PubIP2}"
+            echo export EC2PublicIP="$(aws ec2 describe-instances | jq '.Reservations[].Instances[] | select( .State.Name=="running" and .Tags[].Value== "lecture13-al2_instance_cfn" and .PublicIpAddress != null) | .PublicIpAddress')" >> env_vars.sh
+            #↓aws cloudformation describe-stacksでも可能ですが、EC2を手動で停止/開始したときにCFnデプロイ時に生成されたIPと変わってくるので、稼働しているインスタンスのIPを取得する方法で記述しました。
+            #echo export EC2PublicIP="$(aws cloudformation describe-stacks --stack-name ec2-03  | jq -r '.Stacks[] | .Outputs[] | select(.OutputKey == "EC2PublicIP") | .OutputValue ')" >> env_vars.sh
             echo export LoadBalancerDNSName="$(aws cloudformation describe-stacks --stack-name alb-05 | jq -r '.Stacks[] | .Outputs[] | select(.OutputKey == "LoadBalancerDNSName")| .OutputValue')" >> env_vars.sh 
             echo export RDSEndpoint="$(aws cloudformation describe-stacks --stack-name rds-04 | jq -r '.Stacks[] | .Outputs[] | select(.OutputKey == "RDSEndpoint")| .OutputValue')" >> env_vars.sh
             echo export S3BucketName="$(aws cloudformation describe-stacks --stack-name s3-06 | jq -r '.Stacks[] | .Outputs[] | select(.OutputKey == "S3BucketName")| .OutputValue')" >> env_vars.sh
             # source $BASH_ENV
             cat env_vars.sh
-      
-      # - run: 
-      #     name: set AWS_ALB_DNS
-      #     command: |
-      #       set -x
-      #       echo export AWS_ALB_DNS="$(aws cloudformation describe-stacks --stack-name alb-05 | jq -r '.Stacks[] | .Outputs[] | select(.OutputKey == "LoadBalancerDNSName")| .OutputValue')" >> $BASH_ENV    
-      #       source $BASH_ENV 
-      # - run: |
-      #     cp $BASH_ENV bash.env
-      #persist_to_workspace：ジョブで生成されたファイルやデータを一時的なストレージ（ワークスペース）に保存（アーティファクトとして保存）し、後続のジョブでそのデータを使用できるようにする機能
+            #.sh形式にしている理由=====
+            # sourceコマンドの利用:
+            # source env_vars.shコマンドを使用すると、そのスクリプト内のコマンドが現在のシェルで実行されます。この方法により、スクリプト内で設定された環境変数は現在のシェル環境に適用されます。
+            # source（または.）はスクリプトをサブシェルで実行するのではなく、現在のシェルで実行するため、スクリプト内の環境変数設定が有効になります。
+            # シバンの必要性がない:
+            # シェルスクリプトを直接実行する場合は、#!/bin/bashのようなシバンが必要ですが、sourceで読み込むスクリプトには必要ありません。
+            # .shファイルとして保存する理由
+            # わかりやすさ:
+            # .sh拡張子を持つファイルは、シェルスクリプトであることが明確です。これにより、ファイルの内容と目的が一目でわかります。
+            # 一貫性:
+            # 環境変数の設定をスクリプトファイルとして保存することで、他のスクリプトやジョブから再利用が容易になります。
+            #=====
+
       - persist_to_workspace:
           root: .
           paths:
@@ -88,7 +86,7 @@ jobs:
     steps:
       - checkout
       - attach_workspace:
-          at: /workspace-ansible
+          at: .
       - add_ssh_keys:
           fingerprints:
             - "${KEY_FINGERPRINT}"
@@ -102,7 +100,7 @@ jobs:
       - run:
           name: "Load Environment Variables"
           command: |
-            source /workspace-ansible/env_vars.sh
+            source .env_vars.sh
             echo $EC2PublicIP
             echo $RDSEndpoint
             echo $LoadBalancerDNSName
