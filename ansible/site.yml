@@ -19,7 +19,7 @@
       # public_ipv4: "$(curl https://checkip.amazonaws.com/)"
       app_dir: /home/ec2-user/raisetech-live8-sample-app
       # AWS_RDS_USERNAME: admin
-      AWS_RDS_PW: "${AWS_RDS_PW}"
+      AWS_RDS_PW: "${{ lookup('env', 'AWS_RDS_PW') }}"
       #以下のRDSEndpointなどの値はEC2_PUBLIC_IP同様にCircleCI>config>sed-iコマンドにより書き換えることになるので$～みたいな書き方ではない
       AWS_RDS_ENDPOINT: RDSEndpoint
       AWS_ALB_DNS: LoadBalancerDNSName
