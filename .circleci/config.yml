@@ -50,16 +50,15 @@ jobs:
 
       - run: 
           name: set environment variable
+          #後続のjob(ansible)で使うIP、DNS、RDSendpointなどをAWSCLIで取得しenv_vars.sh(.shにしておくのがミソ)に書き込む
+          #→persist_to_workspaceでアーティファクトとして保存してansibleのjobでenv_vars.sを読み込み環境変数を受け取る
           command: |
             set -x
-            echo $BASH_ENV
-            echo "バッシュエンブのビフォー：${BASH_ENV}"
-            echo export EC2_PUBLIC_IP="$(aws cloudformation describe-stacks --stack-name ec2-03  | jq -r '.Stacks[] | .Outputs[] | select(.OutputKey == "EC2PublicIP") | .OutputValue ')" >> $BASH_ENV
-            echo export AWS_ALB_DNS="$(aws cloudformation describe-stacks --stack-name alb-05 | jq -r '.Stacks[] | .Outputs[] | select(.OutputKey == "LoadBalancerDNSName")| .OutputValue')" >> $BASH_ENV    
-            echo export AWS_RDS_ENDPOINT="$(aws cloudformation describe-stacks --stack-name rds-04 | jq -r '.Stacks[] | .Outputs[] | select(.OutputKey == "RDSEndpoint")| .OutputValue')" >> $BASH_ENV
+            echo export EC2_PUBLIC_IP="$(aws cloudformation describe-stacks --stack-name ec2-03  | jq -r '.Stacks[] | .Outputs[] | select(.OutputKey == "EC2PublicIP") | .OutputValue ')" >> env_vars.sh
+            echo export AWS_ALB_DNS="$(aws cloudformation describe-stacks --stack-name alb-05 | jq -r '.Stacks[] | .Outputs[] | select(.OutputKey == "LoadBalancerDNSName")| .OutputValue')" >> env_vars.sh 
+            echo export AWS_RDS_ENDPOINT="$(aws cloudformation describe-stacks --stack-name rds-04 | jq -r '.Stacks[] | .Outputs[] | select(.OutputKey == "RDSEndpoint")| .OutputValue')" >> env_vars.sh
             # echo export S3_BUCKET_NAME="$(aws s3 ls | sort -nr | head -n 1 | awk '{print $NF}')" >> $BASH_ENV
-            echo $BASH_ENV
-            source $BASH_ENV
+            # source $BASH_ENV
       
       # - run: 
       #     name: set AWS_ALB_DNS
@@ -67,12 +66,13 @@ jobs:
       #       set -x
       #       echo export AWS_ALB_DNS="$(aws cloudformation describe-stacks --stack-name alb-05 | jq -r '.Stacks[] | .Outputs[] | select(.OutputKey == "LoadBalancerDNSName")| .OutputValue')" >> $BASH_ENV    
       #       source $BASH_ENV 
-      - run: |
-          cp $BASH_ENV bash.env
+      # - run: |
+      #     cp $BASH_ENV bash.env
+      #persist_to_workspace：ジョブで生成されたファイルやデータを一時的なストレージ（ワークスペース）に保存（アーティファクトとして保存）し、後続のジョブでそのデータを使用できるようにする機能
       - persist_to_workspace:
           root: .
           paths:
-            - bash.env
+            - env_vars.sh
   
   # execute-ansible:
   #   docker:
