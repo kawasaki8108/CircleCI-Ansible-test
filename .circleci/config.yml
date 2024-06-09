@@ -100,7 +100,7 @@ jobs:
       - run:
           name: "Load Environment Variables"
           command: |
-            source .env_vars.sh
+            source env_vars.sh
             echo $EC2PublicIP
             echo $RDSEndpoint
             echo $LoadBalancerDNSName
