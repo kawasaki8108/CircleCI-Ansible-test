@@ -160,9 +160,9 @@ workflows:
       #       - cfn-lint
       - execute-cfn:
           context: aws
-      - execute-ansible:
-          requires:
-            - execute-cfn
+      # - execute-ansible:
+      #     requires:
+      #       - execute-cfn
       # - execute-serverspec:
       #     requires:
       #       - execute-ansible
