@@ -124,9 +124,9 @@ jobs:
           command: |
             cat ansible/inventory/target.yml
             cat ansible/site.yml
-      # - run:
-      #     name: Execute Ansible Playbook
-      #     command: ansible-playbook -i ansible/inventory ansible/site.yml
+      - run:
+          name: Execute Ansible Playbook
+          command: ansible-playbook -i ansible/inventory ansible/site.yml
           
   
   # execute-serverspec:
