@@ -1,10 +1,10 @@
 all:
   hosts: 
     webappservers:
-      #CircleCI>config/yml内で「sed -i "s/EC2_PUBLIC_IP/${EC2_PUBLIC_IP}/g" ansible/inventory/target.yml」によりAWSCLIで取得した値に書き換える
+      #CircleCI>config/yml内で「sed -i "s/EC2PublicIP/${EC2PublicIP}/g" ansible/inventory/target.yml」によりAWSCLIで取得した値に書き換える
       #(checkoutした環境なのでこのリポジトリのソースコードが直接上書きされるわけではないので大丈夫)
-      #CircleCIのマネコン上の環境変数として設定しているわけではなく、「EC2_PUBLIC_IP」を狙い撃ちでsedで書き換えるので$EC2_PUBLIC_IPみたいにしなくてok
-      ansible_host:  EC2_PUBLIC_IP
+      #CircleCIのマネコン上の環境変数として設定しているわけではなく、「EC2PublicIP」を狙い撃ちでsedで書き換えるので$EC2PublicIPみたいにしなくてok
+      ansible_host:  EC2PublicIP
       
       ansible_user: ec2-user
       # host_key_checking: False
