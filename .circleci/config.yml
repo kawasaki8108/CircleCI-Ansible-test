@@ -54,11 +54,19 @@ jobs:
           #→persist_to_workspaceでアーティファクトとして保存してansibleのjobでenv_vars.sを読み込み環境変数を受け取る
           command: |
             set -x
-            echo export EC2_PUBLIC_IP="$(aws cloudformation describe-stacks --stack-name ec2-03  | jq -r '.Stacks[] | .Outputs[] | select(.OutputKey == "EC2PublicIP") | .OutputValue ')" >> env_vars.sh
-            echo export AWS_ALB_DNS="$(aws cloudformation describe-stacks --stack-name alb-05 | jq -r '.Stacks[] | .Outputs[] | select(.OutputKey == "LoadBalancerDNSName")| .OutputValue')" >> env_vars.sh 
-            echo export AWS_RDS_ENDPOINT="$(aws cloudformation describe-stacks --stack-name rds-04 | jq -r '.Stacks[] | .Outputs[] | select(.OutputKey == "RDSEndpoint")| .OutputValue')" >> env_vars.sh
-            echo export S3_BUCKET_NAME="$(aws cloudformation describe-stacks --stack-name s3-06 | jq -r '.Stacks[] | .Outputs[] | select(.OutputKey == "S3BucketName")| .OutputValue')" >> env_vars.sh
+            echo export EC2PublicIP="$(aws cloudformation describe-stacks --stack-name ec2-03  | jq -r '.Stacks[] | .Outputs[] | select(.OutputKey == "EC2PublicIP") | .OutputValue ')" >> env_vars.sh
+            #既存のEC2に対して適用したい場合↓(タグ指定によるもの)
+            EC2PubIP2="$(aws ec2 describe-instances | jq '.Reservations[].Instances[] | select( .Tags[].Value== "lecture13-al2_instance_cfn" and .PublicIpAddress != null) | .PublicIpAddress')"
+            echo "aws ec2 describe-instancesによるもの：${EC2PubIP2}"
+            EC2PubIP2="$(aws ec2 describe-instances | jq '.Reservations[].Instances[] | select( .State.Name=="running" and .Tags[].Value== "lecture13-al2_instance_cfn" and .PublicIpAddress != null) | .PublicIpAddress')"
+            echo "aws ec2 describe-instancesによるものrunning：${EC2PubIP2}"
+            EC2PubIP2="$(aws ec2 describe-instances | jq '.Reservations[].Instances[] | select( .Tags[].Value== "lecture13-al2_instance_cfn" and .PublicIpAddress != null) | .PublicIpAddress')"
+            echo "aws ec2 describe-instancesによるもの：${EC2PubIP2}"
+            echo export LoadBalancerDNSName="$(aws cloudformation describe-stacks --stack-name alb-05 | jq -r '.Stacks[] | .Outputs[] | select(.OutputKey == "LoadBalancerDNSName")| .OutputValue')" >> env_vars.sh 
+            echo export RDSEndpoint="$(aws cloudformation describe-stacks --stack-name rds-04 | jq -r '.Stacks[] | .Outputs[] | select(.OutputKey == "RDSEndpoint")| .OutputValue')" >> env_vars.sh
+            echo export S3BucketName="$(aws cloudformation describe-stacks --stack-name s3-06 | jq -r '.Stacks[] | .Outputs[] | select(.OutputKey == "S3BucketName")| .OutputValue')" >> env_vars.sh
             # source $BASH_ENV
+            cat env_vars.sh
       
       # - run: 
       #     name: set AWS_ALB_DNS
@@ -74,26 +82,42 @@ jobs:
           paths:
             - env_vars.sh
   
-  # execute-ansible:
-  #   docker:
-  #     - image: cimg/python:3.12.0
-  #   steps:
-  #     - checkout
-  #     - attach_workspace:
-  #         at: .
-  #     - add_ssh_keys:
-  #         fingerprints:
-  #           - "${KEY_FINGERPRINT}"
-  #     - run: python --version
-  #     - run: pip install --upgrade pip
-  #     - run: pip --version
-  #     - run: 
-  #         name: install ansible
-  #         command: pip install ansible==9.6.0 #バージョン指定なしの場合で2.17がインストールされたときにruby環境構築用の各種パッケージがyumモジュールで入らなかったのでバージョン指定しました(core:2.16.7)
-  #     - run: ansible --version
-  #     - run:
-  #         name: Execute Ansible Playbook
-  #         command: ansible-playbook -i ansible/inventory ansible/site.yml
+  execute-ansible:
+    docker:
+      - image: cimg/python:3.12.0
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /workspace-ansible
+      - add_ssh_keys:
+          fingerprints:
+            - "${KEY_FINGERPRINT}"
+      - run: python --version
+      - run: pip install --upgrade pip
+      - run: pip --version
+      - run: 
+          name: install ansible
+          command: pip install ansible==9.6.0 #バージョン指定なしの場合で2.17がインストールされたときにruby環境構築用の各種パッケージがyumモジュールで入らなかったのでバージョン指定しました(core:2.16.7)
+      - run: ansible --version
+      - run:
+          name: "Load Environment Variables"
+          command: |
+            source /workspace-ansible/env_vars.sh
+            echo $EC2PublicIP
+            echo $RDSEndpoint
+            echo $LoadBalancerDNSName
+            echo $S3BucketName
+      - run:
+          name: "Set AWS Resources Info in Ansible Inventory"
+          command: |
+            echo "Setting AWS resources info in Ansible inventory"
+            sed -i "s/EC2PublicIP/${EC2PublicIP}/g" ansible/inventory/target.yml
+            sed -i "s/LoadBalancerDNSName/${LoadBalancerDNSName}/g" ansible/site.yml
+            sed -i "s/RDSEndpoint/${RDSEndpoint}/g" ansible/site.yml
+            sed -i "s/S3BucketName/${S3BucketName}/g" ansible/site.yml
+      - run:
+          name: Execute Ansible Playbook
+          command: ansible-playbook -i ansible/inventory ansible/site.yml
           
   
   # execute-serverspec:
@@ -127,9 +151,9 @@ workflows:
       #       - cfn-lint
       - execute-cfn:
           context: aws
-      # - execute-ansible:
-      #     requires:
-      #       - execute-cfn
+      - execute-ansible:
+          requires:
+            - execute-cfn
       # - execute-serverspec:
       #     requires:
       #       - execute-ansible
