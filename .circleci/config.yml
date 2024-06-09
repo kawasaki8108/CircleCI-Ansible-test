@@ -111,6 +111,8 @@ jobs:
           command: |
             set -x
             echo "Setting AWS resources info in Ansible inventory"
+            pwd
+            ls -al
             source env_vars.sh #runコマンドごとにパスを通さないといけない
             sed -i "s/EC2PublicIP/${EC2PublicIP}/g" ansible/inventory/target.yml
             sed -i "s/LoadBalancerDNSName/${LoadBalancerDNSName}/g" ansible/site.yml
@@ -122,9 +124,9 @@ jobs:
           command: |
             cat ansible/inventory/target.yml
             cat ansible/site.yml
-      - run:
-          name: Execute Ansible Playbook
-          command: ansible-playbook -i ansible/inventory ansible/site.yml
+      # - run:
+      #     name: Execute Ansible Playbook
+      #     command: ansible-playbook -i ansible/inventory ansible/site.yml
           
   
   # execute-serverspec:
