@@ -37,16 +37,16 @@ jobs:
           #参考）https://docs.aws.amazon.com/ja_jp/cli/v1/userguide/cli-configure-files.html#cli-configure-files-using-profiles
           #AWS_PROFILEを使わないときのコマンドの例：aws cloudformation deploy --template-file cloudformation/vpc-01.yml --stack-name vpc-01 --profile "OIDC-PROFILE"
 
-      - run:
-          name: cloudformation deploy
-          command: |
-            set -x
-            aws cloudformation deploy --template-file cloudformation/vpc-01.yml --stack-name vpc-01
-            aws cloudformation deploy --template-file cloudformation/sg-02.yml --stack-name sg-02
-            aws cloudformation deploy --template-file cloudformation/ec2-03.yml --stack-name ec2-03 --capabilities CAPABILITY_IAM
-            aws cloudformation deploy --template-file cloudformation/rds-04.yml --stack-name rds-04
-            aws cloudformation deploy --template-file cloudformation/alb-05.yml --stack-name alb-05
-            aws cloudformation deploy --template-file cloudformation/s3-06.yml --stack-name s3-06
+      # - run:
+      #     name: cloudformation deploy
+      #     command: |
+      #       set -x
+      #       aws cloudformation deploy --template-file cloudformation/vpc-01.yml --stack-name vpc-01
+      #       aws cloudformation deploy --template-file cloudformation/sg-02.yml --stack-name sg-02
+      #       aws cloudformation deploy --template-file cloudformation/ec2-03.yml --stack-name ec2-03 --capabilities CAPABILITY_IAM
+      #       aws cloudformation deploy --template-file cloudformation/rds-04.yml --stack-name rds-04
+      #       aws cloudformation deploy --template-file cloudformation/alb-05.yml --stack-name alb-05
+      #       aws cloudformation deploy --template-file cloudformation/s3-06.yml --stack-name s3-06
 
       - run: 
           name: set environment variable
@@ -115,6 +115,9 @@ jobs:
           command: |
             set -x
             echo "Setting AWS resources info in Ansible inventory"
+            pwd
+            echo $BASH
+            echo $EC2PublicIP
             sed -i "s/EC2PublicIP/${EC2PublicIP}/g" ansible/inventory/target.yml
             sed -i "s/LoadBalancerDNSName/${LoadBalancerDNSName}/g" ansible/site.yml
             sed -i "s/RDSEndpoint/${RDSEndpoint}/g" ansible/site.yml
