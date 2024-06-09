@@ -113,11 +113,13 @@ jobs:
       - run:
           name: "Set AWS Resources Info in Ansible Inventory"
           command: |
+            set -x
             echo "Setting AWS resources info in Ansible inventory"
             sed -i "s/EC2PublicIP/${EC2PublicIP}/g" ansible/inventory/target.yml
             sed -i "s/LoadBalancerDNSName/${LoadBalancerDNSName}/g" ansible/site.yml
             sed -i "s/RDSEndpoint/${RDSEndpoint}/g" ansible/site.yml
             sed -i "s/S3BucketName/${S3BucketName}/g" ansible/site.yml
+
       - run:
           name: "after cat target.yml site.yml"
           command: |
