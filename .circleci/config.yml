@@ -171,6 +171,7 @@ jobs:
             pwd
             ls -al
             source env_vars.sh
+            mkdir ~/.ssh/
             touch ~/.ssh/config
             echo "Host target" >> ~/.ssh/config
             echo "    Hostname ${EC2PublicIP}" >> ~/.ssh/config
@@ -204,6 +205,7 @@ workflows:
       # - execute-ansible:
       #     requires:
       #       - execute-cfn
+      - execute-serverspec
       # - execute-serverspec:
       #     requires:
       #       - execute-ansible
