@@ -173,6 +173,7 @@ jobs:
             source env_vars.sh
             mkdir ~/.ssh/
             touch ~/.ssh/config
+            ls -al ~
             echo "Host target" >> ~/.ssh/config
             echo "    Hostname ${EC2PublicIP}" >> ~/.ssh/config
             echo "    User ec2-user" >> ~/.ssh/config
@@ -194,18 +195,20 @@ jobs:
 workflows:
   CircleCItest:
     jobs:
-      - checking-dir-file-envvars
+      # - checking-dir-file-envvars
       # - cfn-lint
       # - execute-cfn:
       #     context: aws
       #     requires:
       #       - cfn-lint
-      # - execute-cfn:
-      #     context: aws
+      - execute-cfn:
+          context: aws
       # - execute-ansible:
       #     requires:
       #       - execute-cfn
-      - execute-serverspec
+      - execute-serverspec:
+            requires:
+            - execute-cfn
       # - execute-serverspec:
       #     requires:
       #       - execute-ansible
