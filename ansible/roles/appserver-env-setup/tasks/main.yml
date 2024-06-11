@@ -64,6 +64,11 @@
   ansible.builtin.service:
     name: puma.service
     state: started
+    # enabled: true
+
+- name: puma service enabled
+  ansible.builtin.service:
+    name: puma.service
     enabled: true
 
 - name: restart puma.service
