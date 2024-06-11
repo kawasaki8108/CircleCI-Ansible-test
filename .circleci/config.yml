@@ -16,11 +16,8 @@ jobs:
             set -x
             pwd
             ls -al
-            echo $EC2PublicIP
-            echo $RDSEndpoint
-            echo $LoadBalancerDNSName
-            echo $S3BucketName
-            printenv
+            ls -al $HOME
+
             
   
   # cfn-lint:
@@ -200,11 +197,11 @@ workflows:
       #     context: aws
       #     requires:
       #       - cfn-lint
-      - execute-cfn:
-          context: aws
-      - execute-ansible:
-          requires:
-            - execute-cfn
-      - execute-serverspec:
-          requires:
-            - execute-ansible
+      # - execute-cfn:
+      #     context: aws
+      # - execute-ansible:
+      #     requires:
+      #       - execute-cfn
+      # - execute-serverspec:
+      #     requires:
+      #       - execute-ansible
