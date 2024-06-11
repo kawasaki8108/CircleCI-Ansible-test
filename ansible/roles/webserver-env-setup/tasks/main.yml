@@ -31,12 +31,12 @@
   notify: restart nginx  
 
 #サービス有効化
-# - name: nginx service activate
-#   become: true
-#   ansible.builtin.service:
-#     name: nginx
-#     state: started
-#     enabled: true
+- name: nginx service activate
+  become: true
+  ansible.builtin.service:
+    name: nginx
+    state: started
+    enabled: true
 #設定ファイルなどに変更があったときだけ稼働させるものの定義（taskと同階層にhandlersを書く）
 
 
