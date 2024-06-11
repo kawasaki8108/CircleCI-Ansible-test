@@ -17,6 +17,8 @@ jobs:
             pwd
             ls -al
             ls -al $HOME
+            ls -al /home
+            ls -al /
 
             
   
