@@ -1,9 +1,28 @@
 version: 2.1
 orbs:
   aws-cli: circleci/aws-cli@4.1.3
-  ruby: circleci/ruby@2.0.0
 
 jobs:
+  checking-dir-file-envvars:
+    docker:
+      - image: cimg/base:2024.06
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - run:
+          name: checking directory and file structure and environment variables
+          command: |
+            set -x
+            pwd
+            ls -al
+            echo $EC2PublicIP
+            echo $RDSEndpoint
+            echo $LoadBalancerDNSName
+            echo $S3BucketName
+            printenv
+            
+  
   # cfn-lint:
   #   # executor: python/default　実行環境としてOrb由来使わずDockerイメージを使うので無効化
   #   docker:
@@ -129,30 +148,53 @@ jobs:
           command: ansible-playbook -i ansible/inventory ansible/site.yml
           
   
-  # execute-serverspec:
-  #   executor: ruby/default
-  #   steps:
-  #     - checkout
-  #     # サーバーのセットアップ
-  #     - run:
-  #         name: bundle install
-  #         command: |
-  #           cd serverspec
-  #           gem list -e rails
-  #           bundle install --path vendor/bundle
+  execute-serverspec:
+    docker:
+      - image: cimg/ruby:3.3.2
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - run:
+          name: install serverspec
+          command: |
+            set -x
+            ruby --version
+            gem --version
+            gem list 
+            gem install serverspec
+            gem list
+      
+      - run:
+          name: create ~/.ssh/config file to make ssh connection from Serverspec
+          command: |
+            set -x
+            pwd
+            ls -al
+            source env_vars.sh
+            touch ~/.ssh/config
+            echo "Host target" >> ~/.ssh/config
+            echo "    Hostname ${EC2PublicIP}" >> ~/.ssh/config
+            echo "    User ec2-user" >> ~/.ssh/config
+            echo "    IdentityFile ${KEY_FINGERPRINT}" >> ~/.ssh/config
+            ls -al
+            cat  ~/.ssh/config
 
-  #     # Serverspecのテストを実行
-  #     - run:
-  #         name: execute serverspec
-  #         command: |
-  #           cd serverspec
-  #           bundle exec rake spec
-
-
+      - run: 
+          name: execute serverspece
+          command: |
+            set -x
+            pwd
+            ls -al
+            cd serverspec
+            pwd
+            ls -al
+            rake spec
 
 workflows:
   CircleCItest:
     jobs:
+      - checking-dir-file-envvars
       # - cfn-lint
       # - execute-cfn:
       #     context: aws
@@ -163,6 +205,6 @@ workflows:
       - execute-ansible:
           requires:
             - execute-cfn
-      # - execute-serverspec:
-      #     requires:
-      #       - execute-ansible
+      - execute-serverspec:
+          requires:
+            - execute-ansible
