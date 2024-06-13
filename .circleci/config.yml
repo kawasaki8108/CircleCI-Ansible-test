@@ -181,7 +181,7 @@ jobs:
             echo "Host target" >> ~/.ssh/config
             echo "    Hostname ${EC2PublicIP}" >> ~/.ssh/config
             echo "    User ec2-user" >> ~/.ssh/config
-            # echo "    IdentityFile ${KEY_FINGERPRINT}" >> ~/.ssh/config
+            echo "    IdentityFile ${KEY_FINGERPRINT}" >> ~/.ssh/config
             ls -al
             cat  ~/.ssh/config
 
@@ -194,6 +194,7 @@ jobs:
             cd serverspec
             pwd
             ls -al
+            rake --version
             rake spec
     environment:
       TARGET_HOST: target
