@@ -154,6 +154,9 @@ jobs:
       - checkout
       - attach_workspace:
           at: .
+      - add_ssh_keys:
+          fingerprints:
+            - "${KEY_FINGERPRINT}"
       - run:
           name: install serverspec
           command: |
@@ -173,11 +176,12 @@ jobs:
             source env_vars.sh
             mkdir ~/.ssh/
             touch ~/.ssh/config
+            chmod 600 ~/.ssh/config
             ls -al ~
             echo "Host target" >> ~/.ssh/config
             echo "    Hostname ${EC2PublicIP}" >> ~/.ssh/config
             echo "    User ec2-user" >> ~/.ssh/config
-            echo "    IdentityFile ${KEY_FINGERPRINT}" >> ~/.ssh/config
+            # echo "    IdentityFile ${KEY_FINGERPRINT}" >> ~/.ssh/config
             ls -al
             cat  ~/.ssh/config
 
@@ -191,6 +195,8 @@ jobs:
             pwd
             ls -al
             rake spec
+    environment:
+      TARGET_HOST: target
 
 workflows:
   CircleCItest:
