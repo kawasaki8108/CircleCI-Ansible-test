@@ -2,42 +2,37 @@ version: 2.1
 orbs:
   aws-cli: circleci/aws-cli@4.1.3
 
-jobs:
-  checking-dir-file-envvars:
-    docker:
-      - image: cimg/base:2024.06
+
+commands:
+  checking-dir-file-envvars-for-debug: #デバッグ用のコマンドのまとめを用意しておく
     steps:
-      - checkout
-      - attach_workspace:
-          at: .
       - run:
           name: checking directory and file structure and environment variables
           command: |
-            set -x
+            set -x #set -x:コマンドの実行結果を明示することデバックに利用する
             pwd
-            ls -al
-            ls -al $HOME
+            ls -al #/home/circleci/projectの配下
+            ls -al $HOME #/home/circleciの配下(チルダ~と一緒)
             ls -al /home
             ls -al /
+            printenv #環境変数確認
 
-            
+
+jobs:
+  cfn-lint:
+    docker:
+      - image: cimg/python:3.12.0
+    steps:
+      - checkout
+      - run: python --version
+      - run: pip install --upgrade pip
+      - run: pip --version
+      - run: pip install cfn-lint
+      - run:
+          name: run cfn-lint
+          command: |
+            cfn-lint -i W3010 -t cloudformation/*.yml
   
-  # cfn-lint:
-  #   # executor: python/default　実行環境としてOrb由来使わずDockerイメージを使うので無効化
-  #   docker:
-  #     - image: cimg/python:3.12.0
-
-  #   steps:
-  #     - checkout
-  #     - run: python --version
-  #     - run: pip install --upgrade pip
-  #     - run: pip --version
-  #     - run: pip install cfn-lint
-  #     - run:
-  #         name: run cfn-lint
-  #         command: |
-  #           cfn-lint -i W3010 -t cloudformation/*.yml
-
   execute-cfn:
     executor: aws-cli/default
     steps:
@@ -47,30 +42,31 @@ jobs:
           role_arn: "${AWS_ROLE_ARN}"
           role_session_name: "CircleC-OIDC-session"
           #aws-cli/installは不要(setupメソッドに内包されているため)
-
+      - checking-dir-file-envvars-for-debug
       - run:
           name: Set AWS Profile
-          command: echo 'export AWS_PROFILE="OIDC-PROFILE"' >> $BASH_ENV
+          command: |
+            set -x
+            echo 'export AWS_PROFILE="OIDC-PROFILE"' >> $BASH_ENV
           #CFnデプロイのコマンドでは以下の例のように--profileのオプションを付ける必要があるが、ここで環境変数として設定しておくことで冗長な記述を回避できます。
           #参考）https://docs.aws.amazon.com/ja_jp/cli/v1/userguide/cli-configure-files.html#cli-configure-files-using-profiles
           #AWS_PROFILEを使わないときのコマンドの例：aws cloudformation deploy --template-file cloudformation/vpc-01.yml --stack-name vpc-01 --profile "OIDC-PROFILE"
-
-      # - run:
-      #     name: cloudformation deploy
-      #     #set -x:コマンドの実行結果を明示することデバックに利用する
-      #     command: |
-      #       set -x
-      #       aws cloudformation deploy --template-file cloudformation/vpc-01.yml --stack-name vpc-01
-      #       aws cloudformation deploy --template-file cloudformation/sg-02.yml --stack-name sg-02
-      #       aws cloudformation deploy --template-file cloudformation/ec2-03.yml --stack-name ec2-03 --capabilities CAPABILITY_IAM
-      #       aws cloudformation deploy --template-file cloudformation/rds-04.yml --stack-name rds-04
-      #       aws cloudformation deploy --template-file cloudformation/alb-05.yml --stack-name alb-05
-      #       aws cloudformation deploy --template-file cloudformation/s3-06.yml --stack-name s3-06
-
+      - run:
+          name: cloudformation deploy
+          command: |
+            set -x
+            aws cloudformation deploy --template-file cloudformation/vpc-01.yml --stack-name vpc-01
+            aws cloudformation deploy --template-file cloudformation/sg-02.yml --stack-name sg-02
+            aws cloudformation deploy --template-file cloudformation/ec2-03.yml --stack-name ec2-03 --capabilities CAPABILITY_IAM
+            aws cloudformation deploy --template-file cloudformation/rds-04.yml --stack-name rds-04
+            aws cloudformation deploy --template-file cloudformation/alb-05.yml --stack-name alb-05
+            aws cloudformation deploy --template-file cloudformation/s3-06.yml --stack-name s3-06
       - run: 
           name: set environment variable
-          #後続のjob(ansible)で使うIP、DNS、RDSendpointなどをAWSCLIで取得しenv_vars.sh(.shにしておくのがミソ)に書き込む
-          #→persist_to_workspaceでアーティファクトとして保存してansibleのjobでenv_vars.sを読み込み環境変数を受け取る
+          #後続のjob(ansible)で使うIP、DNS、RDSendpointなどをAWSCLIで取得しenv_vars.shに書き込む
+          #→persist_to_workspaceでアーティファクトとして保存してansibleのjobでenv_vars.shを読み込み環境変数を受け取る
+          #コマンド >> $BASH_ENVで書き出してもよいが中身をechoで確認できるわけではなく、直感的ではない。(利便性は高いが今回は挙動をわかりやすく理解するためにenv_vars.shにした)
+          #$BASH_ENVに書き出すなら一旦すべてかきだしたあとにsource $BASH_ENVを実行することで後続の別のrunコマンドでも使えるはず（検証はしていない）。ただしjobをまたぐ場合はworkspaceを介することになるのは一緒。
           command: |
             set -x
             echo export EC2PublicIP="$(aws ec2 describe-instances | jq '.Reservations[].Instances[] | select( .State.Name=="running" and .Tags[].Value== "lecture13-al2_instance_cfn" and .PublicIpAddress != null) | .PublicIpAddress')" >> env_vars.sh
@@ -79,7 +75,6 @@ jobs:
             echo export LoadBalancerDNSName="$(aws cloudformation describe-stacks --stack-name alb-05 | jq -r '.Stacks[] | .Outputs[] | select(.OutputKey == "LoadBalancerDNSName")| .OutputValue')" >> env_vars.sh 
             echo export RDSEndpoint="$(aws cloudformation describe-stacks --stack-name rds-04 | jq -r '.Stacks[] | .Outputs[] | select(.OutputKey == "RDSEndpoint")| .OutputValue')" >> env_vars.sh
             echo export S3BucketName="$(aws cloudformation describe-stacks --stack-name s3-06 | jq -r '.Stacks[] | .Outputs[] | select(.OutputKey == "S3BucketName")| .OutputValue')" >> env_vars.sh
-            # source $BASH_ENV
             cat env_vars.sh
             #.sh形式にしている理由=====
             # sourceコマンドの利用:
@@ -93,7 +88,6 @@ jobs:
             # 一貫性:
             # 環境変数の設定をスクリプトファイルとして保存することで、他のスクリプトやジョブから再利用が容易になります。
             #=====
-
       - persist_to_workspace:
           root: .
           paths:
@@ -116,8 +110,9 @@ jobs:
           name: install ansible
           command: pip install ansible==9.6.0 #バージョン指定なしの場合で2.17がインストールされたときにruby環境構築用の各種パッケージがyumモジュールで入らなかったのでバージョン指定しました(core:2.16.7)
       - run: ansible --version
+      - checking-dir-file-envvars-for-debug
       - run:
-          name: "Load Environment Variables"
+          name: Load Environment Variables
           command: |
             source env_vars.sh
             echo $EC2PublicIP
@@ -125,28 +120,24 @@ jobs:
             echo $LoadBalancerDNSName
             echo $S3BucketName
       - run:
-          name: "Set AWS Resources Info in Ansible Inventory"
+          name: Set AWS Resources Info in Ansible Inventory
           command: |
             set -x
-            echo "Setting AWS resources info in Ansible inventory"
             pwd
-            ls -al
             source env_vars.sh #runコマンドごとにパスを通さないといけない
             sed -i "s/EC2PublicIP/${EC2PublicIP}/g" ansible/inventory/target.yml
             sed -i "s/LoadBalancerDNSName/${LoadBalancerDNSName}/g" ansible/site.yml
             sed -i "s/RDSEndpoint/${RDSEndpoint}/g" ansible/site.yml
             sed -i "s/S3BucketName/${S3BucketName}/g" ansible/site.yml
-
       - run:
-          name: "after cat target.yml site.yml"
+          name: after cat target.yml site.yml
           command: |
             cat ansible/inventory/target.yml
             cat ansible/site.yml
       - run:
           name: Execute Ansible Playbook
           command: ansible-playbook -i ansible/inventory ansible/site.yml
-          
-  
+
   execute-serverspec:
     docker:
       - image: cimg/ruby:3.3.2
@@ -157,66 +148,54 @@ jobs:
       - add_ssh_keys:
           fingerprints:
             - "${KEY_FINGERPRINT}"
+      - checking-dir-file-envvars-for-debug
       - run:
           name: install serverspec
           command: |
             set -x
             ruby --version
             gem --version
-            gem list 
+            gem list | grep -e rake -e serverspec #-eオプションは一致処理に指定した正規表現を行うオプションだが、実際には、または（or）の検索を行うときに使われる
             gem install serverspec
-            gem list
-      
+            gem list | grep -e rake -e serverspec   
       - run:
           name: create ~/.ssh/config file to make ssh connection from Serverspec
           command: |
             set -x
-            pwd
-            ls -al
-            source env_vars.sh
+            source env_vars.sh #EC2PublicIPの中身がほしいためパスを通す
             mkdir ~/.ssh/
             touch ~/.ssh/config
             chmod 600 ~/.ssh/config
-            ls -al ~
             echo "Host target" >> ~/.ssh/config
             echo "    Hostname ${EC2PublicIP}" >> ~/.ssh/config
             echo "    User ec2-user" >> ~/.ssh/config
-            # echo "    IdentityFile ${KEY_FINGERPRINT}" >> ~/.ssh/config
-            ls -al
+            # echo "    IdentityFile ${KEY_FINGERPRINT}" >> ~/.ssh/config #add_ssh_keys機能を前段で使っているため不要
             cat  ~/.ssh/config
-
+      - checking-dir-file-envvars-for-debug
       - run: 
           name: execute serverspece
           command: |
             set -x
-            pwd
-            ls -al
             cd serverspec
             pwd
             ls -al
             rake --version
-            rake spec:run
+            rake spec:run #runコマンドがないと走らなかったので
     environment:
       TARGET_HOST: target
 
+
 workflows:
-  CircleCItest:
+  CircleCItest-and-deploy:
     jobs:
-      # - checking-dir-file-envvars
-      # - cfn-lint
-      # - execute-cfn:
-      #     context: aws
-      #     requires:
-      #       - cfn-lint
+      - cfn-lint
       - execute-cfn:
-          context: aws
-      # - execute-ansible:
-      #     requires:
-      #       - execute-cfn
-      - execute-serverspec:
-            context: aws
-            requires:
+          context: aws #IAMroleによる一時的な認証情報をコンテクストとしてまとめたものとして保持しているのでそれを使えるようにするため
+          requires:
+            - cfn-lint
+      - execute-ansible:
+          requires:
             - execute-cfn
-      # - execute-serverspec:
-      #     requires:
-      #       - execute-ansible
+      - execute-serverspec:
+          requires:
+            - execute-ansible
