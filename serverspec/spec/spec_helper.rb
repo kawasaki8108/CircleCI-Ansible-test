@@ -15,8 +15,6 @@ options = Net::SSH::Config.for(host)
 
 set :host, host
 set :ssh_options, options
-
-# set :disable_sudo, true #テストスクリプトをsudoを使わずに実行する
-
+set :disable_sudo, true #テストスクリプトをsudoを使わずに実行する
 set :path, '/sbin:/usr/sbin:/usr/local/sbin:$PATH' 
 #テストが実行される環境のPATH変数を設定→/sbin, /usr/sbin, /usr/local/sbinなどのディレクトリにあるコマンドを実行できる
