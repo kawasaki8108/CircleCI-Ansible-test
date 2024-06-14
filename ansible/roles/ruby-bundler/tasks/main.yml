@@ -167,6 +167,3 @@
     user_install: no
   timeout: 300
   when: bundler_exists is failed
-
-
-
