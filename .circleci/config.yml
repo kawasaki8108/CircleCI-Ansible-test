@@ -195,7 +195,7 @@ jobs:
             pwd
             ls -al
             rake --version
-            rake spec
+            rake spec:run
     environment:
       TARGET_HOST: target
 
