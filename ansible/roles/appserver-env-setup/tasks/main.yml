@@ -68,6 +68,14 @@
   # ansible.builtin.systemd_service:
   #   daemon_reload: true
 
+- name: systemd_service start puma.service
+  become: yes
+  ansible.builtin.systemd_service:
+    name: puma.service
+    state: started
+    daemon_reload: yes
+    enabled: yes
+
 - name: puma service activate
   become: true
   ansible.builtin.service:
