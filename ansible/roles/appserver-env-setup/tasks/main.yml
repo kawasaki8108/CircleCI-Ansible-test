@@ -43,7 +43,7 @@
 
 - name: edit development.rb
   become: true
-  template:
+  ansible.builtin.template:
     src: development.rb.j2
     dest: "{{ app_dir }}/config/environments/development.rb"
   register: development_rb
@@ -51,7 +51,7 @@
 
 - name: edit storage.yml
   become: true
-  template:
+  ansible.builtin.template:
     src: storage.yml.j2
     dest: "{{ app_dir }}/config/storage.yml"
   register: storage_yml
@@ -60,12 +60,13 @@
 
 #サービス有効化
 - name: Reload systemd daemon
+  become: true
+  ansible.builtin.command: bash -lc "systemctl daemon-reload"
   #daemon-reloadしないと新たに配置した設定ファイルがsystemdに認識されない(command:systemctl daemon-reload)
   #refs:https://zenn.dev/trysmr/articles/65a6db4deffdbf
   #refs:https://tnamao.hatenablog.com/entry/2016/12/03/014742
-  become: true
-  ansible.builtin.systemd_service:
-    daemon_reload: true
+  # ansible.builtin.systemd_service:
+  #   daemon_reload: true
 
 - name: puma service activate
   become: true
