@@ -15,7 +15,8 @@ commands:
             ls -al $HOME #/home/circleciの配下(チルダ~と一緒)
             ls -al /home
             ls -al /
-            printenv #環境変数確認
+            set #シェル変数確認
+            # printenv #環境変数確認
 
 
 jobs:
