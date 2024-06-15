@@ -59,6 +59,14 @@
 
 
 #サービス有効化
+- name: Reload systemd daemon
+  #daemon-reloadしないと新たに配置した設定ファイルがsystemdに認識されない(command:systemctl daemon-reload)
+  #refs:https://zenn.dev/trysmr/articles/65a6db4deffdbf
+  #refs:https://tnamao.hatenablog.com/entry/2016/12/03/014742
+  become: true
+  ansible.builtin.systemd_service:
+    daemon_reload: true
+
 - name: puma service activate
   become: true
   ansible.builtin.service:
@@ -72,8 +80,8 @@
     name: puma.service
     state: restarted
     enabled: true
-  # when: database_yml.changed == true
-  #   or  application_rb.changed == true
-  #   or  puma_service.changed == true
-  #   or  development_rb.changed == true
-  #   or  storage_yml.changed == true
+  when: database_yml.changed == true
+    or  application_rb.changed == true
+    or  puma_service.changed == true
+    or  development_rb.changed == true
+    or  storage_yml.changed == true
