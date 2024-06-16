@@ -48,7 +48,6 @@
     dest: "{{ app_dir }}/config/environments/development.rb"
   register: development_rb
 
-
 - name: edit storage.yml
   become: true
   ansible.builtin.template:
@@ -56,20 +55,34 @@
     dest: "{{ app_dir }}/config/storage.yml"
   register: storage_yml
 
-
+#先にフォルダを用意しておかないとpuma.service内のpumaの起動コマンド実行時に「No such file or directory」と言われたため
+- name: mkdir ~/app/tmp/pids and /tmp/sockets
+  ansible.builtin.file:
+    path: "{{ app_dir }}/{{ item.path }}"
+    state: directory
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}"
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "/tmp/sockets"
+      owner: "ec2-user"
+      group: "ec2-user"
+      mode: "775"
+    - path: "/tmp/pids"
+      owner: "ec2-user"
+      group: "ec2-user"
+      mode: "775"
 
 #サービス有効化
 - name: Reload systemd daemon
-  become: true
-  ansible.builtin.command: bash -lc "systemctl daemon-reload"
   #daemon-reloadしないと新たに配置した設定ファイルがsystemdに認識されない(command:systemctl daemon-reload)
   #refs:https://zenn.dev/trysmr/articles/65a6db4deffdbf
   #refs:https://tnamao.hatenablog.com/entry/2016/12/03/014742
-  # ansible.builtin.systemd_service:
-  #   daemon_reload: true
+  ansible.builtin.systemd_service:
+    daemon_reload: true
 
 - name: systemd_service start puma.service
-  become: yes
+  become: true
   ansible.builtin.systemd_service:
     name: puma.service
     state: started
