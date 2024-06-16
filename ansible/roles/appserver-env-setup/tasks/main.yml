@@ -74,12 +74,12 @@
       mode: "775"
 
 #サービス有効化
-- name: Reload systemd daemon
-  #daemon-reloadしないと新たに配置した設定ファイルがsystemdに認識されない(command:systemctl daemon-reload)
-  #refs:https://zenn.dev/trysmr/articles/65a6db4deffdbf
-  #refs:https://tnamao.hatenablog.com/entry/2016/12/03/014742
-  ansible.builtin.systemd_service:
-    daemon_reload: true
+# - name: Reload systemd daemon
+#   #daemon-reloadしないと新たに配置した設定ファイルがsystemdに認識されない(command:systemctl daemon-reload)
+#   #refs:https://zenn.dev/trysmr/articles/65a6db4deffdbf
+#   #refs:https://tnamao.hatenablog.com/entry/2016/12/03/014742
+#   ansible.builtin.systemd_service:
+#     daemon_reload: true
 
 - name: systemd_service start puma.service
   become: true
@@ -89,12 +89,12 @@
     daemon_reload: yes
     enabled: yes
 
-- name: puma service activate
-  become: true
-  ansible.builtin.service:
-    name: puma.service
-    state: started
-    enabled: true
+# - name: puma service activate
+#   become: true
+#   ansible.builtin.service:
+#     name: puma.service
+#     state: started
+#     enabled: true
 
 - name: restart puma.service
   become: true
