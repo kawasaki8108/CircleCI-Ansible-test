@@ -1,4 +1,5 @@
 ---
+#tasks>main.ymlでnotify: restart pumaを有効にしたらこのhandlerが稼働する
 - name: restart puma.service
   become: true
   ansible.builtin.service:

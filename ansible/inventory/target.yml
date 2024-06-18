@@ -1,11 +1,23 @@
 all:
   hosts: 
     webappservers:
-      ansible_host:  18.183.68.56
+      #CircleCI>config/yml内で「sed -i "s/EC2PublicIP/${EC2PublicIP}/g" ansible/inventory/target.yml」によりAWSCLIで取得した値に書き換える
+      #(checkoutした環境なのでこのリポジトリのソースコードが直接上書きされるわけではないので大丈夫)
+      #CircleCIのマネコン上の環境変数として設定しているわけではなく、「EC2PublicIP」を狙い撃ちでsedで書き換えるので$EC2PublicIPみたいにしなくてok
+      ansible_host: EC2PublicIP      
       ansible_user: ec2-user
-      host_key_checking: False
-      ansible_ssh_private_key_file: /mnt/c/Users/kawasaki8/Kawasaki1002.pem
+      # ansible_ssh_private_key_file: /mnt/c/Users/kawasaki8/Kawasaki1002.pem #ローカルから実行用
       ansible_python_interpreter: /usr/bin/python3
+
+#参考情報
+# sed: ストリームエディタ。テキストを操作するためのコマンド。
+# -i: インプレース編集。ファイルを直接編集するオプション。
+# "s/EC2_PUBLIC_IP/${EC2_PUBLIC_IP}/g": 置換コマンド。
+# s: 置換コマンドの開始。
+# EC2_PUBLIC_IP: 置き換え対象の文字列。
+# ${EC2_PUBLIC_IP}: 置き換え後の文字列（シェル変数の値）。
+# /g: グローバルオプション。行全体で一致するすべてのインスタンスを置き換える。
+
 
 # dbservers:
 #   hosts:

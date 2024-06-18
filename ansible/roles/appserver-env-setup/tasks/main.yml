@@ -43,34 +43,67 @@
 
 - name: edit development.rb
   become: true
-  template:
+  ansible.builtin.template:
     src: development.rb.j2
     dest: "{{ app_dir }}/config/environments/development.rb"
   register: development_rb
 
+- name: edit storage.yml
+  become: true
+  ansible.builtin.template:
+    src: storage.yml.j2
+    dest: "{{ app_dir }}/config/storage.yml"
+  register: storage_yml
 
-# - name: edit storage.yml
-#   become: yes
-#   template:
-#     src: storage.yml.j2
-#     dest: "{{ app_dir }}/config/storage.yml"
-
-
+#先にフォルダを用意しておかないとpuma.service内のpumaの起動コマンド実行時に「No such file or directory」と言われたため
+- name: mkdir ~/app/tmp/pids and /tmp/sockets
+  ansible.builtin.file:
+    path: "{{ app_dir }}/{{ item.path }}"
+    state: directory
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}"
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "/tmp/sockets"
+      owner: "ec2-user"
+      group: "ec2-user"
+      mode: "775"
+    - path: "/tmp/pids"
+      owner: "ec2-user"
+      group: "ec2-user"
+      mode: "775"
 
 #サービス有効化
-- name: puma service activate
+# - name: Reload systemd daemon
+#   #daemon-reloadしないと新たに配置した設定ファイルがsystemdに認識されない(command:systemctl daemon-reload)
+#   #refs:https://zenn.dev/trysmr/articles/65a6db4deffdbf
+#   #refs:https://tnamao.hatenablog.com/entry/2016/12/03/014742
+#   ansible.builtin.systemd_service:
+#     daemon_reload: true
+
+- name: systemd_service start puma.service
   become: true
-  ansible.builtin.service:
+  ansible.builtin.systemd_service:
     name: puma.service
     state: started
-    enabled: true
+    daemon_reload: yes
+    enabled: yes
 
-# - name: restart puma.service
+# - name: puma service activate
 #   become: true
 #   ansible.builtin.service:
 #     name: puma.service
-#     state: restarted
-#   when: database_yml.changed == true
-#     or  application_rb.changed == true
-#     or  puma_service.changed == true
-#     or  development_rb.changed == true
+#     state: started
+#     enabled: true
+
+- name: restart puma.service
+  become: true
+  ansible.builtin.service:
+    name: puma.service
+    state: restarted
+    enabled: true
+  when: database_yml.changed == true
+    or  application_rb.changed == true
+    or  puma_service.changed == true
+    or  development_rb.changed == true
+    or  storage_yml.changed == true

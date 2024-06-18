@@ -47,9 +47,3 @@
     name: mysql-community-client
     state: present
   when: mysql_installed.changed == true
-
-
-
-
-
-
